@@ -62,17 +62,6 @@ local function NotifyUser(text, a)
 	)
 end
 
-local function vapeGithubRequest(scripturl)
-	if not isfile("vape/"..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
-		assert(suc, res)
-		assert(res ~= "404: Not Found", res)
-		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
-		writefile("vape/"..scripturl, res)
-	end
-	return readfile("vape/"..scripturl)
-end
-
 local function downloadVapeAsset(path)
 	if not isfile(path) then
 		task.spawn(function()
@@ -89,7 +78,7 @@ local function downloadVapeAsset(path)
 			repeat task.wait() until isfile(path)
 			textlabel:Destroy()
 		end)
-		local suc, req = pcall(function() return vapeGithubRequest(path:gsub("vape/assets", "assets")) end)
+		local suc, req = pcall(function() return voidware.getFile(path:gsub("vape/assets", "assets")) end)
         if suc and req then
 		    writefile(path, req)
         else
@@ -158,7 +147,7 @@ local function getPlayerColor(plr)
 end
 
 local whitelist = {data = {WhitelistedUsers = {}}, hashes = {}, said = {}, alreadychecked = {}, customtags = {}, loaded = false, localprio = 0, hooked = false, get = function() return 0, true end}
-local entityLibrary = loadstring(vapeGithubRequest("Libraries/entityHandler.lua"))()
+local entityLibrary = loadstring(voidware.getFile("Libraries/entityHandler.lua"))()
 shared.vapeentity = entityLibrary
 do
 	entityLibrary.selfDestruct()
@@ -336,7 +325,7 @@ local function AllNearPosition(distance, amount, checktab)
 	return returnedplayer
 end
 
-local sha = loadstring(vapeGithubRequest("Libraries/sha.lua"))()
+local sha = loadstring(voidware.getFile("Libraries/sha.lua"))()
 run(function()
 	local olduninject
 	function whitelist:get(plr)

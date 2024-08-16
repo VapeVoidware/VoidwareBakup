@@ -2,7 +2,7 @@ if shared.VapeExecuted then
 	local VERSION = "4.10"
 	local baseDirectory = (shared.VapePrivate and "vapeprivate/" or "vape/")
 	local profilesDirectory
-	if shared.ClosetCheatMode then
+	if shared.voidware.closetCheating then
 		if not isfolder('vape/ClosetProfiles') then makefolder('vape/ClosetProfiles') end
 		profilesDirectory = "ClosetProfiles/"
 	else
@@ -152,16 +152,6 @@ if shared.VapeExecuted then
 	GuiLibrary["MainGui"] = gui
 
 	local vapeCachedAssets = {}
-	local function vapeGithubRequest(scripturl)
-		if not isfile("vape/"..scripturl) then
-			local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
-			assert(suc, res)
-			assert(res ~= "404: Not Found", res)
-			if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
-			writefile("vape/"..scripturl, res)
-		end
-		return readfile("vape/"..scripturl)
-	end
 
 	local function downloadVapeAsset(path)
 		if customassetcheck then
@@ -180,7 +170,7 @@ if shared.VapeExecuted then
 					repeat task.wait() until isfile(path)
 					textlabel:Destroy()
 				end)
-				local suc, req = pcall(function() return vapeGithubRequest(path:gsub("vape/assets", "assets")) end)
+				local suc, req = pcall(function() return voidware.getFile(path:gsub("vape/assets", "assets")) end)
 				if suc and req then
 					writefile(path, req)
 				else
@@ -853,7 +843,7 @@ if shared.VapeExecuted then
 			shared.VapeSwitchServers = true
 			shared.VapeOpenGui = (clickgui.Visible)
 			shared.VapePrivate = vapeprivate
-			loadstring(vapeGithubRequest("NewMainScript.lua"))()
+			loadstring(voidware.getFile("NewMainScript.lua"))()
 		end
 	end
 

@@ -2,13 +2,13 @@ repeat task.wait() until game:IsLoaded()
 local GuiLibrary
 local baseDirectory = (shared.VapePrivate and "vapeprivate/" or "vape/")
 local profilesDirectory
-if shared.ClosetCheatMode then
+if shared.voidware.closetCheating then
 	if not isfolder('vape/ClosetProfiles') then makefolder('vape/ClosetProfiles') end
 	profilesDirectory = "ClosetProfiles/"
 else
 	profilesDirectory = "Profiles/"
 end
-local pload = shared.pload or function(file, isImportant) local suc, err = pcall(function() loadstring(readfile('vape/'..tostring(file))) end) if not suc and err then local text = "[Voidware Error] Error loading critical file! FileName: "..tostring(file).." Error: "..tostring(err) warn(text) if isImportant then game:GetService("Players").LocalPlayer:Kick(text) end end end
+local pload = shared.pload
 local vapeInjected = true
 local oldRainbow = false
 local errorPopupShown = false
@@ -144,17 +144,6 @@ local function displayErrorPopup(text, funclist)
 	end)
 end
 
-local function vapeGithubRequest(scripturl)
-	if not isfile("vape/"..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
-		assert(suc, res)
-		assert(res ~= "404: Not Found", res)
-		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
-		writefile("vape/"..scripturl, res)
-	end
-	return readfile("vape/"..scripturl)
-end
-
 local function downloadVapeAsset(path)
 	if customassetcheck then
 		if not isfile(path) then
@@ -172,7 +161,7 @@ local function downloadVapeAsset(path)
 				repeat task.wait() until isfile(path)
 				textlabel:Destroy()
 			end)
-			local suc, req = pcall(function() return vapeGithubRequest(path:gsub("vape/assets", "assets")) end)
+			local suc, req = pcall(function() return voidware.getFile(path:gsub("vape/assets", "assets")) end)
 			if suc and req then
 				writefile(path, req)
 			else
@@ -190,7 +179,7 @@ for i,v in pairs({baseDirectory:gsub("/", ""), "vape", "vape/Libraries", "vape/C
 	if not isfolder(v) then makefolder(v) end
 end
 task.spawn(function()
-	local success, assetver = pcall(function() return vapeGithubRequest("assetsversion.txt") end)
+	local success, assetver = pcall(function() return voidware.getFile("assetsversion.txt") end)
 	if not isfile("vape/assetsversion.txt") then writefile("vape/assetsversion.txt", "0") end
 	if success and assetver > readfile("vape/assetsversion.txt") then
 		redownloadedAssets = true
@@ -206,7 +195,8 @@ end)
 GuiLibrary = pload('GuiLibrary.lua', true)
 shared.GuiLibrary = GuiLibrary
 writefile("vape/CustomModules/cachechecked.txt", "verified")
---[[if not isfile("vape/CustomModules/cachechecked.txt") then
+--[[
+if not isfile("vape/CustomModules/cachechecked.txt") then
 	local isNotCached = false
 	for i,v in pairs({"vape/Universal.lua", "vape/MainScript.lua", "vape/GuiLibrary.lua"}) do
 		if isfile(v) and not readfile(v):find("--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.") then
@@ -240,7 +230,7 @@ writefile("vape/CustomModules/cachechecked.txt", "verified")
 		end})
 	end
 	writefile("vape/CustomModules/cachechecked.txt", "verified")
-end--]]
+end]]
 
 local saveSettingsLoop = coroutine.create(function()
 	if inputService.TouchEnabled then return end
@@ -1635,19 +1625,19 @@ if isBedwarsGame() then
 				task.spawn(function()
 					repeat task.wait() until game:IsLoaded()
 					task.spawn(function()
-						local a = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("StatCardsScreenGui")
+						local a = playersService.LocalPlayer.PlayerGui:WaitForChild("StatCardsScreenGui")
 						a.Enabled = false
 					end)
 					task.spawn(function()
-						local b = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("QuestProgressGui")
+						local b = playersService.LocalPlayer.PlayerGui:WaitForChild("QuestProgressGui")
 						b.Enabled = false
 					end)
 					task.spawn(function()
-						local c = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("BattlePassMatchExperienceBar")
+						local c = playersService.LocalPlayer.PlayerGui:WaitForChild("BattlePassMatchExperienceBar")
 						c.Enabled = false
 					end)
 					task.spawn(function()
-						local d = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("MatchEndMissionProgressGui")
+						local d = playersService.LocalPlayer.PlayerGui:WaitForChild("MatchEndMissionProgressGui")
 						d.Enabled = false
 					end)
 				end)
@@ -2276,8 +2266,8 @@ if not shared.NoAutoExecute then
 			if shared.VoidDev then
 				teleportScript = 'shared.VoidDev = true\n'..teleportScript
 			end
-			if shared.ClosetCheatMode then
-				teleportScript = 'shared.ClosetCheatMode = true\n'..teleportScript
+			if shared.voidware.closetCheating then
+				teleportScript = 'shared.voidware.closetCheating = true\n'..teleportScript
 			end
 			if shared.VapePrivate then
 				teleportScript = 'shared.VapePrivate = true\n'..teleportScript
@@ -2347,7 +2337,7 @@ GuiLibrary.Restart = function()
 	shared.VapeOpenGui = true
 	shared.VapePrivate = vapePrivateCheck
 	pload('NewMainScript.lua', true)
-	--loadstring(vapeGithubRequest("NewMainScript.lua"))()
+	--loadstring(voidware.getFile("NewMainScript.lua"))()
 end
 
 GeneralSettings.CreateButton2({
@@ -2364,7 +2354,7 @@ GeneralSettings.CreateButton2({
 		shared.VapeOpenGui = true
 		shared.VapePrivate = vapePrivateCheck
 		pload('NewMainScript.lua', true)
-		--loadstring(vapeGithubRequest("NewMainScript.lua"))()
+		--loadstring(voidware.getFile("NewMainScript.lua"))()
 	end
 })
 GUISettings.CreateButton2({
@@ -2455,7 +2445,7 @@ local function loadVape()
 				end)
 				if not suc and err then
 					errorNotification("Voidware Loader - "..game.PlaceId..".lua", "\n".."Error loading Vape module: "..game.PlaceId..".lua Error: "..tostring(err), 5)
-					--game:GetService("Players").LocalPlayer:Kick("Error loading Vape module: "..game.PlaceId..".lua Error: "..tostring(err))
+					--playersService.LocalPlayer:Kick("Error loading Vape module: "..game.PlaceId..".lua Error: "..tostring(err))
 				end
 			end
 		end
@@ -2478,7 +2468,7 @@ local function loadVape()
 							end)
 							if suc then pcall(function() InfoNotification("Voidware Backup Loader - ", "Successfully loaded backup for CustomModules/Voidware6872274481Backup.lua!", 5) end) end
 						end
-						--game:GetService("Players").LocalPlayer:Kick("Error loading Voidware module: Voidware"..game.PlaceId..".lua Error: "..tostring(err))
+						--playersService.LocalPlayer:Kick("Error loading Voidware module: Voidware"..game.PlaceId..".lua Error: "..tostring(err))
 					end
 				end
 			end
@@ -2490,11 +2480,7 @@ local function loadVape()
 		end
 		task.spawn(function()
 			repeat task.wait() until shared.vapewhitelist
-			if shared.vapewhitelist:get(game:GetService("Players").LocalPlayer) == 0 then
-				InfoNotification("Voidware Loader", "Voidware Public successfully loaded! | discord.gg/voidware", 1.5)
-			else
-				InfoNotification("Voidware Loader", "Voidware Private successfully loaded! | discord.gg/voidware", 1.5)
-			end
+			InfoNotification("Voidware Loader", `Voidware{shared.vapewhitelist:get(playersService.LocalPlayer) == 0 and '' or ' Private'} successfully loaded! | discord.gg/voidware`, 1.5)
 		end)
 	else
 		repeat task.wait() until shared.VapeManualLoad
@@ -2513,7 +2499,7 @@ local function loadVape()
 		table.sort(profiles, function(a, b) return b == "default" and true or a:lower() < b:lower() end)
 		ProfilesTextList.RefreshValues(profiles)
 	end)
-	if not suc then game:GetService("Players").LocalPlayer:Kick("[Voidware Profile Saving]: Error saving your profiles! Error: "..tostring(err).." Please send this to erchobg#0000 on discord or make a support ticket in discord.gg/voidware") end
+	if not suc then playersService.LocalPlayer:Kick("[Voidware Profile Saving]: Error saving your profiles! Error: "..tostring(err).." Please send this to erchobg#0000 on discord or make a support ticket in discord.gg/voidware") end
 	print("Suc: "..tostring(suc).." Err: "..tostring(err))
 	GUIbind.Reload()
 	TextGUIUpdate()

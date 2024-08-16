@@ -2,9 +2,7 @@ local VoidwareFunctions = {}
 
 VoidwareFunctions["ClosetCheatToggle_Enable"] = Instance.new("BindableEvent")
 VoidwareFunctions["ClosetCheatToggle_Disable"] = Instance.new("BindableEvent")
-repeat task.wait() until game:IsLoaded()
-repeat task.wait() until shared.GUI
-repeat task.wait() until shared.GuiLibrary
+
 local GuiLibrary = shared.GuiLibrary
 local GUI = shared.GUI
 local lplr = game:GetService("Players").LocalPlayer
@@ -212,17 +210,7 @@ shared.vapewindows_controller = vapewindows_controller
 shared.voidwarewindows_controller = voidwarewindows_controller
 shared.vprivatewindows_controller = vprivatewindows_controller
 function VoidwareFunctions.LoadFunctions()
-    local function vapeGithubRequest(scripturl)
-        if not isfile("vape/"..scripturl) then
-            local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/main/"..scripturl, true) end)
-            assert(suc, res)
-            assert(res ~= "404: Not Found", res)
-            if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
-            writefile("vape/"..scripturl, res)
-        end
-        return readfile("vape/"..scripturl)
-    end
-    local entityLibrary = loadstring(vapeGithubRequest("Libraries/entityHandler.lua"))()
+    local entityLibrary = loadstring(voidware.getFile("Libraries/entityHandler.lua"))()
     shared.vapeentity = entityLibrary
     getgenv().entityLibrary = entityLibrary
     local RunLoops = {RenderStepTable = {}, StepTable = {}, HeartTable = {}}
@@ -692,7 +680,7 @@ function VoidwareFunctions.LoadVoidware()
         Name = 'ClosetCheatMode',
         Function = function(calling)
             if calling then 
-                print("1: "..tostring(shared.ClosetCheatMode).." 2: "..tostring(shared.profilesDirectory))
+                print("1: "..tostring(shared.voidware.closetCheating).." 2: "..tostring(shared.profilesDirectory))
                 if shared.profilesDirectory ~= "ClosetProfiles/" then
                     VoidwareFunctions["ClosetCheatToggle_Enable"]:Fire()
                 end
@@ -707,7 +695,7 @@ function VoidwareFunctions.LoadVoidware()
     task.spawn(function()
         repeat task.wait() until shared.GuiLibrary.ObjectsThatCannotBeSaved["ClosetCheatModeOptionsButton"]
         repeat task.wait() until shared.GuiLibrary.ObjectsThatCannotBeSaved["ClosetCheatModeOptionsButton"].Api
-        if shared.ClosetCheatMode then
+        if shared.voidware.closetCheating then
             if not shared.GuiLibrary.ObjectsThatCannotBeSaved["ClosetCheatModeOptionsButton"].Api.Enabled then
                 shared.GuiLibrary.ObjectsThatCannotBeSaved["ClosetCheatModeOptionsButton"].Api.ToggleButton()
             end
@@ -799,18 +787,18 @@ function VoidwareFunctions.LoadVoidware()
     VoidwareFunctions.LoadServices()
     VoidwareFunctions.LoadFunctions()
     VoidwareFunctions["ClosetCheatToggle_Enable"].Event:Connect(function()
-        if not shared.ClosetCheatMode then
-            shared.ClosetCheatMode = true
+        if not shared.voidware.closetCheating then
+            shared.voidware.closetCheating = true
             GuiLibrary.Restart()
         end
     end)
     VoidwareFunctions["ClosetCheatToggle_Disable"].Event:Connect(function()
-        if shared.ClosetCheatMode then
-            shared.ClosetCheatMode = false
+        if shared.voidware.closetCheating then
+            shared.voidware.closetCheating = false
             GuiLibrary.Restart()
         end
     end)
-    if shared.ClosetCheatMode then
+    if shared.voidware.closetCheating then
         InfoNotification("Voidware | Closet Cheat Mode", "Closet Cheat Mode loaded successfully!", 3)
     end
     --[[task.spawn(function()

@@ -1,6 +1,3 @@
-repeat task.wait() until game:IsLoaded()
-repeat task.wait() until shared.GuiLibrary
-repeat task.wait() until shared.GUI
 repeat task.wait() until shared.run
 
 local run = shared.run

@@ -22,7 +22,7 @@ local vapeTargetInfo = shared.VapeTargetInfo
 local vapeInjected = true
 
 local bedwars = {}
-local store = {
+local bedwarsStore = {
 	attackReach = 0,
 	attackReachUpdate = tick(),
 	blocks = {},
@@ -63,7 +63,7 @@ local store = {
 	},
 	zephyrOrb = 0
 }
-store.blockRaycast.FilterType = Enum.RaycastFilterType.Include
+bedwarsStore.blockRaycast.FilterType = Enum.RaycastFilterType.Include
 local AutoLeave = {Enabled = false}
 
 table.insert(vapeConnections, workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
@@ -101,17 +101,6 @@ local worldtoviewportpoint = function(pos)
 	return gameCamera.WorldToViewportPoint(gameCamera, pos)
 end
 
-local function vapeGithubRequest(scripturl)
-	if not isfile("vape/"..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
-		assert(suc, res)
-		assert(res ~= "404: Not Found", res)
-		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
-		writefile("vape/"..scripturl, res)
-	end
-	return readfile("vape/"..scripturl)
-end
-
 local function downloadVapeAsset(path)
 	if not isfile(path) then
 		task.spawn(function()
@@ -128,7 +117,7 @@ local function downloadVapeAsset(path)
 			repeat task.wait() until isfile(path)
 			textlabel:Destroy()
 		end)
-		local suc, req = pcall(function() return vapeGithubRequest(path:gsub("vape/assets", "assets")) end)
+		local suc, req = pcall(function() return voidware.getFile(path:gsub("vape/assets", "assets")) end)
 		if suc and req then
 			writefile(path, req)
 		else
@@ -218,7 +207,7 @@ local function predictGravity(playerPosition, vel, bulletTime, targetPart, Gravi
 			rootSize = rootSize - 0.03
 		end
 
-		local floorDetection = workspace:Raycast(playerPosition, Vector3.new(vel.X, (estimatedVelocity * physicsUpdate) - rootSize, vel.Z), store.blockRaycast)
+		local floorDetection = workspace:Raycast(playerPosition, Vector3.new(vel.X, (estimatedVelocity * physicsUpdate) - rootSize, vel.Z), bedwarsStore.blockRaycast)
 		if floorDetection then
 			playerPosition = Vector3.new(playerPosition.X, floorDetection.Position.Y + rootSize, playerPosition.Z)
 			local bouncepad = floorDetection.Instance:FindFirstAncestor("gumdrop_bounce_pad")
@@ -290,7 +279,7 @@ GuiLibrary.SelfDestructEvent.Event:Connect(function()
 end)
 
 local function getItem(itemName, inv)
-	for slot, item in pairs(inv or store.localInventory.inventory.items) do
+	for slot, item in pairs(inv or bedwarsStore.localInventory.inventory.items) do
 		if item.itemType == itemName then
 			return item, slot
 		end
@@ -299,7 +288,7 @@ local function getItem(itemName, inv)
 end
 
 local function getItemNear(itemName, inv)
-	for slot, item in pairs(inv or store.localInventory.inventory.items) do
+	for slot, item in pairs(inv or bedwarsStore.localInventory.inventory.items) do
 		if item.itemType == itemName or item.itemType:find(itemName) then
 			return item, slot
 		end
@@ -308,7 +297,7 @@ local function getItemNear(itemName, inv)
 end
 
 local function getHotbarSlot(itemName)
-	for slotNumber, slotTable in pairs(store.localInventory.hotbar) do
+	for slotNumber, slotTable in pairs(bedwarsStore.localInventory.hotbar) do
 		if slotTable.item and slotTable.item.itemType == itemName then
 			return slotNumber - 1
 		end
@@ -332,7 +321,7 @@ end
 
 local function getAxe()
 	local bestAxe, bestAxeSlot = nil, nil
-	for slot, item in pairs(store.localInventory.inventory.items) do
+	for slot, item in pairs(bedwarsStore.localInventory.inventory.items) do
 		if item.itemType:find("axe") and item.itemType:find("pickaxe") == nil and item.itemType:find("void") == nil then
 			bextAxe, bextAxeSlot = item, slot
 		end
@@ -342,7 +331,7 @@ end
 
 local function getSword()
 	local bestSword, bestSwordSlot, bestSwordDamage = nil, nil, 0
-	for slot, item in pairs(store.localInventory.inventory.items) do
+	for slot, item in pairs(bedwarsStore.localInventory.inventory.items) do
 		local swordMeta = bedwars.ItemTable[item.itemType].sword
 		if swordMeta then
 			local swordDamage = swordMeta.damage or 0
@@ -356,7 +345,7 @@ end
 
 local function getBow()
 	local bestBow, bestBowSlot, bestBowStrength = nil, nil, 0
-	for slot, item in pairs(store.localInventory.inventory.items) do
+	for slot, item in pairs(bedwarsStore.localInventory.inventory.items) do
 		if item.itemType:find("bow") then
 			local tab = bedwars.ItemTable[item.itemType].projectileSource
 			local ammo = tab.projectileType("arrow")
@@ -375,7 +364,7 @@ local function getWool()
 end
 
 local function getBlock()
-	for slot, item in pairs(store.localInventory.inventory.items) do
+	for slot, item in pairs(bedwarsStore.localInventory.inventory.items) do
 		if bedwars.ItemTable[item.itemType].block then
 			return item.itemType, item.amount
 		end
@@ -393,21 +382,21 @@ local function getSpeed()
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
 			speed = speed + (8 * (SpeedDamageBoost - 1))
 		end
-		if store.grapple > tick() then
+		if bedwarsStore.grapple > tick() then
 			speed = speed + 90
 		end
-		if store.scythe > tick() then
+		if bedwarsStore.scythe > tick() then
 			speed = speed + 5
 		end
 		if lplr.Character:GetAttribute("GrimReaperChannel") then
 			speed = speed + 20
 		end
-		local armor = store.localInventory.inventory.armor[3]
+		local armor = bedwarsStore.localInventory.inventory.armor[3]
 		if type(armor) ~= "table" then armor = {itemType = ""} end
 		if armor.itemType == "speed_boots" then
 			speed = speed + 12
 		end
-		if store.zephyrOrb ~= 0 then
+		if bedwarsStore.zephyrOrb ~= 0 then
 			speed = speed + 12
 		end
 	end
@@ -455,7 +444,7 @@ local function getBestTool(block)
 	local blockType = blockmeta.block and blockmeta.block.breakType
 	if blockType then
 		local best = 0
-		for i,v in pairs(store.localInventory.inventory.items) do
+		for i,v in pairs(bedwarsStore.localInventory.inventory.items) do
 			local meta = bedwars.ItemTable[v.itemType]
 			if meta.breakBlock and meta.breakBlock[blockType] and meta.breakBlock[blockType] >= best then
 				best = meta.breakBlock[blockType]
@@ -721,7 +710,7 @@ local function AllNearPosition(distance, amount, sortfunction, prediction)
 				end
 			end
 		end
-		for i, v in pairs(store.pots) do
+		for i, v in pairs(bedwarsStore.pots) do
 			if v.PrimaryPart then
 				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
 				if prediction and mag > distance then
@@ -1265,8 +1254,8 @@ run(function()
 							end
 							attackTable.validate.selfPosition = attackValue(attackTable.validate.selfPosition.value + (attackMagnitude > 14.4 and (CFrame.lookAt(attackTable.validate.selfPosition.value, attackTable.validate.targetPosition.value).lookVector * 4) or Vector3.zero))
 						end
-						store.attackReach = math.floor((attackTable.validate.selfPosition.value - attackTable.validate.targetPosition.value).magnitude * 100) / 100
-						store.attackReachUpdate = tick() + 1
+						bedwarsStore.attackReach = math.floor((attackTable.validate.selfPosition.value - attackTable.validate.targetPosition.value).magnitude * 100) / 100
+						bedwarsStore.attackReachUpdate = tick() + 1
 					end
 					return originalRemote:SendToServer(attackTable, ...)
 				end
@@ -1281,11 +1270,11 @@ run(function()
 		return OldBreak(self, breakTable, plr)
 	end
 
-	store.blockPlacer = bedwars.BlockPlacer.new(bedwars.BlockEngine, "wool_white")
+	bedwarsStore.blockPlacer = bedwars.BlockPlacer.new(bedwars.BlockEngine, "wool_white")
 	bedwars.placeBlock = function(speedCFrame, customblock)
 		if getItem(customblock) then
-			store.blockPlacer.blockType = customblock
-			return store.blockPlacer:placeBlock(Vector3.new(speedCFrame.X / 3, speedCFrame.Y / 3, speedCFrame.Z / 3))
+			bedwarsStore.blockPlacer.blockType = customblock
+			return bedwarsStore.blockPlacer:placeBlock(Vector3.new(speedCFrame.X / 3, speedCFrame.Y / 3, speedCFrame.Z / 3))
 		end
 	end
 
@@ -1313,7 +1302,7 @@ run(function()
 			local blockdmg = 0
 			if block and block.Parent ~= nil then
 				if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - (blockpos * 3)).magnitude > 30 then return end
-				store.blockPlace = tick() + 0.1
+				bedwarsStore.blockPlace = tick() + 0.1
 				switchToAndUseTool(block)
 				blockhealthbarpos = {
 					blockPosition = blockpos
@@ -1367,18 +1356,18 @@ run(function()
 
 	local function updateStore(newStore, oldStore)
 		if newStore.Game ~= oldStore.Game then
-			store.matchState = newStore.Game.matchState
-			store.queueType = newStore.Game.queueType or "bedwars_test"
-			store.forgeMasteryPoints = newStore.Game.forgeMasteryPoints
-			store.forgeUpgrades = newStore.Game.forgeUpgrades
+			bedwarsStore.matchState = newStore.Game.matchState
+			bedwarsStore.queueType = newStore.Game.queueType or "bedwars_test"
+			bedwarsStore.forgeMasteryPoints = newStore.Game.forgeMasteryPoints
+			bedwarsStore.forgeUpgrades = newStore.Game.forgeUpgrades
 		end
 		if newStore.Bedwars ~= oldStore.Bedwars then
-			store.equippedKit = newStore.Bedwars.kit ~= "none" and newStore.Bedwars.kit or ""
+			bedwarsStore.equippedKit = newStore.Bedwars.kit ~= "none" and newStore.Bedwars.kit or ""
 		end
 		if newStore.Inventory ~= oldStore.Inventory then
 			local newInventory = (newStore.Inventory and newStore.Inventory.observedInventory or {inventory = {}})
 			local oldInventory = (oldStore.Inventory and oldStore.Inventory.observedInventory or {inventory = {}})
-			store.localInventory = newStore.Inventory.observedInventory
+			bedwarsStore.localInventory = newStore.Inventory.observedInventory
 			if newInventory ~= oldInventory then
 				vapeEvents.InventoryChanged:Fire()
 			end
@@ -1392,7 +1381,7 @@ run(function()
 					local handData = bedwars.ItemTable[currentHand.itemType]
 					handType = handData.sword and "sword" or handData.block and "block" or currentHand.itemType:find("bow") and "bow"
 				end
-				store.localHand = {tool = currentHand and currentHand.tool, Type = handType, amount = currentHand and currentHand.amount or 0}
+				bedwarsStore.localHand = {tool = currentHand and currentHand.tool, Type = handType, amount = currentHand and currentHand.amount or 0}
 			end
 		end
 	end
@@ -1415,39 +1404,39 @@ run(function()
 		end)
 	end
 
-	store.blocks = collectionService:GetTagged("block")
-	store.blockRaycast.FilterDescendantsInstances = {store.blocks}
+	bedwarsStore.blocks = collectionService:GetTagged("block")
+	bedwarsStore.blockRaycast.FilterDescendantsInstances = {bedwarsStore.blocks}
 	table.insert(vapeConnections, collectionService:GetInstanceAddedSignal("block"):Connect(function(block)
-		table.insert(store.blocks, block)
-		store.blockRaycast.FilterDescendantsInstances = {store.blocks}
+		table.insert(bedwarsStore.blocks, block)
+		bedwarsStore.blockRaycast.FilterDescendantsInstances = {bedwarsStore.blocks}
 	end))
 	table.insert(vapeConnections, collectionService:GetInstanceRemovedSignal("block"):Connect(function(block)
-		block = table.find(store.blocks, block)
+		block = table.find(bedwarsStore.blocks, block)
 		if block then
-			table.remove(store.blocks, block)
-			store.blockRaycast.FilterDescendantsInstances = {store.blocks}
+			table.remove(bedwarsStore.blocks, block)
+			bedwarsStore.blockRaycast.FilterDescendantsInstances = {bedwarsStore.blocks}
 		end
 	end))
 	for _, ent in pairs(collectionService:GetTagged("entity")) do
 		if ent.Name == "DesertPotEntity" then
-			table.insert(store.pots, ent)
+			table.insert(bedwarsStore.pots, ent)
 		end
 	end
 	table.insert(vapeConnections, collectionService:GetInstanceAddedSignal("entity"):Connect(function(ent)
 		if ent.Name == "DesertPotEntity" then
-			table.insert(store.pots, ent)
+			table.insert(bedwarsStore.pots, ent)
 		end
 	end))
 	table.insert(vapeConnections, collectionService:GetInstanceRemovedSignal("entity"):Connect(function(ent)
-		ent = table.find(store.pots, ent)
+		ent = table.find(bedwarsStore.pots, ent)
 		if ent then
-			table.remove(store.pots, ent)
+			table.remove(bedwarsStore.pots, ent)
 		end
 	end))
 
 	local oldZephyrUpdate = bedwars.WindWalkerController.updateJump
 	bedwars.WindWalkerController.updateJump = function(self, orb, ...)
-		store.zephyrOrb = lplr.Character and lplr.Character:GetAttribute("Health") > 0 and orb or 0
+		bedwarsStore.zephyrOrb = lplr.Character and lplr.Character:GetAttribute("Health") > 0 and orb or 0
 		return oldZephyrUpdate(self, orb, ...)
 	end
 
@@ -1455,7 +1444,7 @@ run(function()
 		bedwars.WindWalkerController.updateJump = oldZephyrUpdate
 		getmetatable(bedwars.Client).Get = OldGet
 		bedwars.BlockController.isBlockBreakable = OldBreak
-		store.blockPlacer:disable()
+		bedwarsStore.blockPlacer:disable()
 	end)
 
 	local teleportedServers = false
@@ -1467,8 +1456,8 @@ run(function()
 			if currentState.Party and currentState.Party.members and #currentState.Party.members > 0 then
 				queuedstring = queuedstring..'shared.vapeteammembers = '..#currentState.Party.members..'\n'
 			end
-			if store.TPString then
-				queuedstring = queuedstring..'shared.vapeoverlay = "'..store.TPString..'"\n'
+			if bedwarsStore.TPString then
+				queuedstring = queuedstring..'shared.vapeoverlay = "'..bedwarsStore.TPString..'"\n'
 			end
 			queueonteleport(queuedstring)
 		end
@@ -1528,7 +1517,7 @@ do
 								table.insert(newent.Connections, armorobj1.Changed:Connect(function()
 									task.delay(0.3, function()
 										if entityLibrary.entityIds[plr.Name] ~= id then return end
-										store.inventories[plr] = bedwars.getInventory(plr)
+										bedwarsStore.inventories[plr] = bedwars.getInventory(plr)
 										entityLibrary.entityUpdatedEvent:Fire(newent)
 									end)
 								end))
@@ -1537,7 +1526,7 @@ do
 								table.insert(newent.Connections, armorobj2.Changed:Connect(function()
 									task.delay(0.3, function()
 										if entityLibrary.entityIds[plr.Name] ~= id then return end
-										store.inventories[plr] = bedwars.getInventory(plr)
+										bedwarsStore.inventories[plr] = bedwars.getInventory(plr)
 										entityLibrary.entityUpdatedEvent:Fire(newent)
 									end)
 								end))
@@ -1546,7 +1535,7 @@ do
 								table.insert(newent.Connections, armorobj3.Changed:Connect(function()
 									task.delay(0.3, function()
 										if entityLibrary.entityIds[plr.Name] ~= id then return end
-										store.inventories[plr] = bedwars.getInventory(plr)
+										bedwarsStore.inventories[plr] = bedwars.getInventory(plr)
 										entityLibrary.entityUpdatedEvent:Fire(newent)
 									end)
 								end))
@@ -1555,7 +1544,7 @@ do
 								table.insert(newent.Connections, handobj.Changed:Connect(function()
 									task.delay(0.3, function()
 										if entityLibrary.entityIds[plr.Name] ~= id then return end
-										store.inventories[plr] = bedwars.getInventory(plr)
+										bedwarsStore.inventories[plr] = bedwars.getInventory(plr)
 										entityLibrary.entityUpdatedEvent:Fire(newent)
 									end)
 								end))
@@ -1564,7 +1553,7 @@ do
 						if entityLibrary.entityIds[plr.Name] ~= id then return end
 						task.delay(0.3, function()
 							if entityLibrary.entityIds[plr.Name] ~= id then return end
-							store.inventories[plr] = bedwars.getInventory(plr)
+							bedwarsStore.inventories[plr] = bedwars.getInventory(plr)
 							entityLibrary.entityUpdatedEvent:Fire(newent)
 						end)
 						table.insert(newent.Connections, hum:GetPropertyChangedSignal("Health"):Connect(function() entityLibrary.entityUpdatedEvent:Fire(newent) end))
@@ -1699,7 +1688,7 @@ run(function()
 		uselesssquare.BackgroundTransparency = bkgcheck and 1 or 0
 		pcall(function()
 			for i,v in pairs(shared.VapeTargetInfo.Targets) do
-				local inventory = store.inventories[v.Player] or {}
+				local inventory = bedwarsStore.inventories[v.Player] or {}
 					if inventory.hand then
 						handsquare.Image = bedwars.getIcon(inventory.hand, true)
 					else
@@ -1783,9 +1772,9 @@ run(function()
 								},
 								Player = plr.Player
 							}
-							if store.localHand.Type == "sword" then
+							if bedwarsStore.localHand.Type == "sword" then
 								if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-									if store.matchState == 0 then return end
+									if bedwarsStore.matchState == 0 then return end
 								end
 								if AimAssistTargetFrame.Walls.Enabled then
 									if not bedwars.SwordController:canSee({instance = plr.Character, player = plr.Player, getInstance = function() return plr.Character end}) then return end
@@ -1857,9 +1846,9 @@ run(function()
 					if not isNotHoveringOverGui() then continue end
 					if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then continue end
 					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-						if store.matchState == 0 then continue end
+						if bedwarsStore.matchState == 0 then continue end
 					end
-					if store.localHand.Type == "sword" then
+					if bedwarsStore.localHand.Type == "sword" then
 						if bedwars.DaoController.chargingMaid == nil then
 							task.spawn(function()
 								if firstClick <= tick() then
@@ -1870,7 +1859,7 @@ run(function()
 							end)
 							task.wait(math.max((1 / autoclickercps.GetRandomValue()), noclickdelay.Enabled and 0 or 0.142))
 						end
-					elseif store.localHand.Type == "block" then
+					elseif bedwarsStore.localHand.Type == "block" then
 						if autoclickerblocks.Enabled and bedwars.BlockPlacementController.blockPlacer and firstClick <= tick() then
 							if (workspace:GetServerTimeNow() - bedwars.BlockCpsController.lastPlaceTimestamp) > ((1 / 12) * 0.5) then
 								local mouseinfo = bedwars.BlockPlacementController.blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
@@ -2135,7 +2124,7 @@ run(function()
 				table.insert(AutoLeave.Connections, vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable)
 					if (not leaveAttempted) and deathTable.finalKill and deathTable.entityInstance == lplr.Character then
 						leaveAttempted = true
-						if isEveryoneDead() and store.matchState ~= 2 then
+						if isEveryoneDead() and bedwarsStore.matchState ~= 2 then
 							task.wait(1 + (AutoLeaveDelay.Value / 10))
 							if bedwars.ClientStoreHandler:getState().Game.customMatch == nil and bedwars.ClientStoreHandler:getState().Party.leader.userId == lplr.UserId then
 								if not AutoPlayAgain.Enabled then
@@ -2148,7 +2137,7 @@ run(function()
 										end
 										bedwars.QueueController:joinQueue(listofmodes[math.random(1, #listofmodes)])
 									else
-										bedwars.QueueController:joinQueue(store.queueType)
+										bedwars.QueueController:joinQueue(bedwarsStore.queueType)
 									end
 								end
 							end
@@ -2172,7 +2161,7 @@ run(function()
 									end
 									bedwars.QueueController:joinQueue(listofmodes[math.random(1, #listofmodes)])
 								else
-									bedwars.QueueController:joinQueue(store.queueType)
+									bedwars.QueueController:joinQueue(bedwarsStore.queueType)
 								end
 							end
 						end
@@ -2378,18 +2367,18 @@ run(function()
 				end))
 
 				local balloons
-				if entityLibrary.isAlive and (not store.queueType:find("mega")) then
+				if entityLibrary.isAlive and (not bedwarsStore.queueType:find("mega")) then
 					balloons = inflateBalloon()
 				end
-				local megacheck = store.queueType:find("mega") or store.queueType == "winter_event"
+				local megacheck = bedwarsStore.queueType:find("mega") or bedwarsStore.queueType == "winter_event"
 
 				task.spawn(function()
-					repeat task.wait() until store.queueType ~= "bedwars_test" or (not Fly.Enabled)
+					repeat task.wait() until bedwarsStore.queueType ~= "bedwars_test" or (not Fly.Enabled)
 					if not Fly.Enabled then return end
-					megacheck = store.queueType:find("mega") or store.queueType == "winter_event"
+					megacheck = bedwarsStore.queueType:find("mega") or bedwarsStore.queueType == "winter_event"
 				end)
 
-				local flyAllowed = entityLibrary.isAlive and ((lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or store.matchState == 2 or megacheck) and 1 or 0
+				local flyAllowed = entityLibrary.isAlive and ((lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or bedwarsStore.matchState == 2 or megacheck) and 1 or 0
 				if flyAllowed <= 0 and shared.damageanim and (not balloons) then
 					shared.damageanim()
 					bedwars.SoundManager:playSound(bedwars.SoundList["DAMAGE_"..math.random(1, 3)])
@@ -2404,11 +2393,11 @@ run(function()
 				FlyCoroutine = coroutine.create(function()
 					repeat
 						repeat task.wait() until (groundtime - tick()) < 0.6 and not onground
-						flyAllowed = ((lplr.Character and lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or store.matchState == 2 or megacheck) and 1 or 0
+						flyAllowed = ((lplr.Character and lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or bedwarsStore.matchState == 2 or megacheck) and 1 or 0
 						if (not Fly.Enabled) then break end
 						local Flytppos = -99999
 						if flyAllowed <= 0 and FlyTP.Enabled and entityLibrary.isAlive then
-							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -1000, 0), store.blockRaycast)
+							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -1000, 0), bedwarsStore.blockRaycast)
 							if ray then
 								Flytppos = entityLibrary.character.HumanoidRootPart.Position.Y
 								local args = {entityLibrary.character.HumanoidRootPart.CFrame:GetComponents()}
@@ -2416,7 +2405,7 @@ run(function()
 								entityLibrary.character.HumanoidRootPart.CFrame = CFrame.new(unpack(args))
 								task.wait(0.12)
 								if (not Fly.Enabled) then break end
-								flyAllowed = ((lplr.Character and lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or store.matchState == 2 or megacheck) and 1 or 0
+								flyAllowed = ((lplr.Character and lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or bedwarsStore.matchState == 2 or megacheck) and 1 or 0
 								if flyAllowed <= 0 and Flytppos ~= -99999 and entityLibrary.isAlive then
 									local args = {entityLibrary.character.HumanoidRootPart.CFrame:GetComponents()}
 									args[2] = Flytppos
@@ -2434,7 +2423,7 @@ run(function()
 					end
 					if entityLibrary.isAlive then
 						local playerMass = (entityLibrary.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
-						flyAllowed = ((lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or store.matchState == 2 or megacheck) and 1 or 0
+						flyAllowed = ((lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") > 0) or bedwarsStore.matchState == 2 or megacheck) and 1 or 0
 						playerMass = playerMass + (flyAllowed > 0 and 4 or 0) * (tick() % 0.4 < 0.2 and -1 or 1)
 
 						if FlyAnywayProgressBarFrame then
@@ -2656,7 +2645,7 @@ run(function()
 				local grappleHooked = false
 				table.insert(GrappleExploit.Connections, bedwars.Client:Get("GrapplingHookFunctions"):Connect(function(p4)
 					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
-						store.grapple = tick() + 1.8
+						bedwarsStore.grapple = tick() + 1.8
 						grappleHooked = true
 						GrappleExploit.ToggleButton(false)
 					end
@@ -2844,7 +2833,7 @@ run(function()
 				local goneup = false
 				RunLoops:BindToHeartbeat("InfiniteFly", function(delta)
 					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-						if store.matchState == 0 then return end
+						if bedwarsStore.matchState == 0 then return end
 					end
 					if entityLibrary.isAlive then
 						if isnetworkowner(oldcloneroot) then
@@ -2988,7 +2977,7 @@ run(function()
 	local animationdelay = tick()
 
 	local function getStrength(plr)
-		local inv = store.inventories[plr.Player]
+		local inv = bedwarsStore.inventories[plr.Player]
 		local strength = 0
 		local strongestsword = 0
 		if inv then
@@ -3087,7 +3076,7 @@ run(function()
 
 	local function getAttackData()
 		if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-			if store.matchState == 0 then return false end
+			if bedwarsStore.matchState == 0 then return false end
 		end
 		if killauramouse.Enabled then
 			if not inputService:IsMouseButtonPressed(0) then return false end
@@ -3095,11 +3084,11 @@ run(function()
 		if killauragui.Enabled then
 			if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then return false end
 		end
-		local sword = killaurahandcheck.Enabled and store.localHand or getSword()
+		local sword = killaurahandcheck.Enabled and bedwarsStore.localHand or getSword()
 		if not sword or not sword.tool then return false end
 		local swordmeta = bedwars.ItemTable[sword.tool.Name]
 		if killaurahandcheck.Enabled then
-			if store.localHand.Type ~= "sword" or bedwars.DaoController.chargingMaid then return false end
+			if bedwarsStore.localHand.Type ~= "sword" or bedwars.DaoController.chargingMaid then return false end
 		end
 		return sword, swordmeta
 	end
@@ -3107,7 +3096,7 @@ run(function()
 	local function autoBlockLoop()
 		if not killauraautoblock.Enabled or not Killaura.Enabled then return end
 		repeat
-			if store.blockPlace < tick() and entityLibrary.isAlive then
+			if bedwarsStore.blockPlace < tick() and entityLibrary.isAlive then
 				local shield = getItem("infernal_shield")
 				if shield then
 					switchItem(shield.tool)
@@ -3255,7 +3244,7 @@ run(function()
 									if killauratargetframe.Walls.Enabled then
 										if not bedwars.SwordController:canSee({player = plr.Player, getInstance = function() return plr.Character end}) then continue end
 									end
-									if killauranovape.Enabled and store.whitelist.clientUsers[plr.Player.Name] then
+									if killauranovape.Enabled and bedwarsStore.whitelist.clientUsers[plr.Player.Name] then
 										continue
 									end
 									if not firstPlayerNear then
@@ -3284,8 +3273,8 @@ run(function()
 									end
 									local selfpos = selfrootpos + (killaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14.4 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * ((selfrootpos - root.Position).magnitude - 14)) or Vector3.zero)
 									bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
-									store.attackReach = math.floor((selfrootpos - root.Position).magnitude * 100) / 100
-									store.attackReachUpdate = tick() + 1
+									bedwarsStore.attackReach = math.floor((selfrootpos - root.Position).magnitude * 100) / 100
+									bedwarsStore.attackReachUpdate = tick() + 1
 									killaurarealremote:FireServer({
 										weapon = sword.tool,
 										chargedAttack = {chargeRatio = swordmeta.sword.chargedAttack and not swordmeta.sword.chargedAttack.disableOnGrounded and 0.999 or 0},
@@ -3663,7 +3652,7 @@ run(function()
 	local function calculatepos(vec)
 		local returned = vec
 		if entityLibrary.isAlive then
-			local newray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, returned, store.blockRaycast)
+			local newray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, returned, bedwarsStore.blockRaycast)
 			if newray then returned = (newray.Position - entityLibrary.character.HumanoidRootPart.Position) end
 		end
 		return returned
@@ -3684,7 +3673,7 @@ run(function()
 			end
 			local origpos = pos
 			local offsetshootpos = (CFrame.new(pos, pos + Vector3.new(0, -60, 0)) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))).p
-			local ray = workspace:Raycast(pos, Vector3.new(0, -30, 0), store.blockRaycast)
+			local ray = workspace:Raycast(pos, Vector3.new(0, -30, 0), bedwarsStore.blockRaycast)
 			if ray then
 				pos = ray.Position
 				offsetshootpos = pos
@@ -3897,7 +3886,7 @@ run(function()
 								local newvelo = longJumpCFrame.Unit == longJumpCFrame.Unit and longJumpCFrame.Unit * (newnum > 1 and damagetimer or 20) or Vector3.zero
 								newvelo = Vector3.new(newvelo.X, 0, newvelo.Z)
 								longJumpCFrame = longJumpCFrame * (getSpeed() + 3) * dt
-								local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, longJumpCFrame, store.blockRaycast)
+								local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, longJumpCFrame, bedwarsStore.blockRaycast)
 								if ray then
 									longJumpCFrame = Vector3.zero
 									newvelo = Vector3.zero
@@ -4010,7 +3999,7 @@ run(function()
 				RunLoops:BindToHeartbeat("Phase", function()
 					if entityLibrary.isAlive and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero and (not GuiLibrary.ObjectsThatCanBeSaved.SpiderOptionsButton.Api.Enabled or holdingshift) then
 						if PhaseDelay <= tick() then
-							raycastparameters.FilterDescendantsInstances = {store.blocks, collectionService:GetTagged("spawn-cage"), workspace.SpectatorPlatform}
+							raycastparameters.FilterDescendantsInstances = {bedwarsStore.blocks, collectionService:GetTagged("spawn-cage"), workspace.SpectatorPlatform}
 							local PhaseRayCheck = workspace:Raycast(entityLibrary.character.Head.CFrame.p, entityLibrary.character.Humanoid.MoveDirection * 1.15, raycastparameters)
 							if PhaseRayCheck then
 								local PhaseDirection = (PhaseRayCheck.Normal.Z ~= 0 or not PhaseRayCheck.Instance:GetAttribute("GreedyBlock")) and "Z" or "X"
@@ -4182,7 +4171,7 @@ run(function()
 	local function getclosesttop(newmag, pos)
 		local closest, closestmag = pos, newmag * 3
 		if entityLibrary.isAlive then
-			for i,v in pairs(store.blocks) do
+			for i,v in pairs(bedwarsStore.blocks) do
 				local close = closestpos(v, pos)
 				local mag = (close - pos).magnitude
 				if mag <= closestmag then
@@ -4207,16 +4196,16 @@ run(function()
 					repeat
 						task.wait()
 						if ScaffoldHandCheck.Enabled then
-							if store.localHand.Type ~= "block" then continue end
+							if bedwarsStore.localHand.Type ~= "block" then continue end
 						end
 						if ScaffoldMouseCheck.Enabled then
 							if not inputService:IsMouseButtonPressed(0) then continue end
 						end
 						if entityLibrary.isAlive then
 							local wool, woolamount = getWool()
-							if store.localHand.Type == "block" then
-								wool = store.localHand.tool.Name
-								woolamount = getItem(store.localHand.tool.Name).amount or 0
+							if bedwarsStore.localHand.Type == "block" then
+								wool = bedwarsStore.localHand.tool.Name
+								woolamount = getItem(bedwarsStore.localHand.tool.Name).amount or 0
 							elseif (not wool) then
 								wool, woolamount = getBlock()
 							end
@@ -4353,7 +4342,7 @@ run(function()
 			if callback then
 				RunLoops:BindToHeartbeat("Speed", function(delta)
 					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-						if store.matchState == 0 then return end
+						if bedwarsStore.matchState == 0 then return end
 					end
 					if entityLibrary.isAlive then
 						if not (isnetworkowner(entityLibrary.character.HumanoidRootPart) and entityLibrary.character.Humanoid:GetState() ~= Enum.HumanoidStateType.Climbing and (not spiderActive) and (not GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled)) then return end
@@ -4562,7 +4551,7 @@ run(function()
 					controlmodule.moveFunction = function(Self, vec, facecam, ...)
 						if entityLibrary.isAlive then
 							local plr = AllNearPosition(TargetStrafeRange.Value + 5, 10)[1]
-							plr = plr and (not workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, (plr.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position), store.blockRaycast)) and workspace:Raycast(plr.RootPart.Position, Vector3.new(0, -70, 0), store.blockRaycast) and plr or nil
+							plr = plr and (not workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, (plr.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position), bedwarsStore.blockRaycast)) and workspace:Raycast(plr.RootPart.Position, Vector3.new(0, -70, 0), bedwarsStore.blockRaycast) and plr or nil
 							if plr ~= oldplr then
 								if plr then
 									local x, y, z = CFrame.new(plr.RootPart.Position, entityLibrary.character.HumanoidRootPart.Position):ToEulerAnglesXYZ()
@@ -4573,10 +4562,10 @@ run(function()
 							if plr then
 								facecam = false
 								local localPos = CFrame.new(plr.RootPart.Position)
-								local ray = workspace:Blockcast(localPos, Vector3.new(3, 3, 3), CFrame.Angles(0, math.rad(ang), 0).lookVector * TargetStrafeRange.Value, store.blockRaycast)
+								local ray = workspace:Blockcast(localPos, Vector3.new(3, 3, 3), CFrame.Angles(0, math.rad(ang), 0).lookVector * TargetStrafeRange.Value, bedwarsStore.blockRaycast)
 								local newPos = localPos + (CFrame.Angles(0, math.rad(ang), 0).lookVector * (ray and ray.Distance - 1 or TargetStrafeRange.Value))
 								local factor = getSpeed() > 0 and 6 or 4
-								if not workspace:Raycast(newPos.p, Vector3.new(0, -70, 0), store.blockRaycast) then
+								if not workspace:Raycast(newPos.p, Vector3.new(0, -70, 0), bedwarsStore.blockRaycast) then
 									newPos = localPos
 									factor = 40
 								end
@@ -4986,8 +4975,8 @@ run(function()
 
 	local function fpsboosttextures()
 		task.spawn(function()
-			repeat task.wait() until store.matchState ~= 0
-			for i,v in pairs(store.blocks) do
+			repeat task.wait() until bedwarsStore.matchState ~= 0
+			for i,v in pairs(bedwarsStore.blocks) do
 				if v:GetAttribute("PlacedByUserId") == 0 then
 					v.Material = FPSBoost.Enabled and removetextures.Enabled and Enum.Material.SmoothPlastic or (v.Name:find("glass") and Enum.Material.SmoothPlastic or Enum.Material.Fabric)
 					originaltextures[v] = originaltextures[v] or v.MaterialVariant
@@ -5644,7 +5633,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				task.spawn(function()
-					repeat task.wait() until store.matchState ~= 0 or not KillEffect.Enabled
+					repeat task.wait() until bedwarsStore.matchState ~= 0 or not KillEffect.Enabled
 					if KillEffect.Enabled then
 						lplr:SetAttribute("KillEffectType", "none")
 						if KillEffectMode.Value == "Bedwars" then
@@ -5735,13 +5724,13 @@ run(function()
 		Function = function(callback)
 			if callback then
 				task.spawn(function()
-					repeat task.wait() until store.equippedKit ~= ""
+					repeat task.wait() until bedwarsStore.equippedKit ~= ""
 					if KitESP.Enabled then
-						if store.equippedKit == "metal_detector" then
+						if bedwarsStore.equippedKit == "metal_detector" then
 							addKit("hidden-metal", "iron")
-						elseif store.equippedKit == "beekeeper" then
+						elseif bedwarsStore.equippedKit == "beekeeper" then
 							addKit("bee", "bee")
-						elseif store.equippedKit == "bigman" then
+						elseif bedwarsStore.equippedKit == "bigman" then
 							addKit("treeOrb", "natures_essence_1")
 						end
 					end
@@ -5932,7 +5921,7 @@ run(function()
 					nametagstrs[ent.Player] = '<font color="rgb(85, 255, 85)">[</font><font color="rgb(255, 255, 255)">%s</font><font color="rgb(85, 255, 85)">]</font> '..nametagstrs[ent.Player]
 				end
 				if NameTagsShowInventory.Enabled then
-					local inventory = store.inventories[ent.Player] or {armor = {}}
+					local inventory = bedwarsStore.inventories[ent.Player] or {armor = {}}
 					if inventory.hand then
 						v.Main.Hand.Image = bedwars.getIcon(inventory.hand, NameTagsShowInventory.Enabled)
 						if v.Main.Hand.Image:find("rbxasset://") then
@@ -6399,7 +6388,7 @@ run(function()
 						until false
 					end)
 					task.spawn(function()
-						repeat task.wait() until store.matchState ~= 0
+						repeat task.wait() until bedwarsStore.matchState ~= 0
 						if bedwars.ClientStoreHandler:getState().Game.customMatch == nil then
 							debug.setconstant(bedwars.QueueCard.render, 15, 0.1)
 						end
@@ -6446,11 +6435,11 @@ run(function()
 		Function = function(callback)
 			if callback then
 				task.spawn(function()
-					repeat task.wait() until store.matchState ~= 0 or  not vapeInjected
+					repeat task.wait() until bedwarsStore.matchState ~= 0 or  not vapeInjected
 					if vapeInjected and AutoBalloonypos == 0 and AutoBalloon.Enabled then
 						local lowestypos = 99999
-						for i,v in pairs(store.blocks) do
-							local newray = workspace:Raycast(v.Position + Vector3.new(0, 800, 0), Vector3.new(0, -1000, 0), store.blockRaycast)
+						for i,v in pairs(bedwarsStore.blocks) do
+							local newray = workspace:Raycast(v.Position + Vector3.new(0, 800, 0), Vector3.new(0, -1000, 0), bedwarsStore.blockRaycast)
 							if i % 200 == 0 then
 								task.wait(0.06)
 							end
@@ -6476,7 +6465,7 @@ run(function()
 							if entityLibrary.isAlive and touchedpart:IsDescendantOf(lplr.Character) and balloondebounce == false then
 								autobankballoon = true
 								balloondebounce = true
-								local oldtool = store.localHand.tool
+								local oldtool = bedwarsStore.localHand.tool
 								for i = 1, 3 do
 									if getItem("balloon") and (AutoBalloonLegit.Enabled and getHotbarSlot("balloon") or AutoBalloonLegit.Enabled == false) and (lplr.Character:GetAttribute("InflatedBalloons") and lplr.Character:GetAttribute("InflatedBalloons") < 3 or lplr.Character:GetAttribute("InflatedBalloons") == nil) then
 										if AutoBalloonLegit.Enabled then
@@ -6584,7 +6573,7 @@ run(function()
 	}
 
 	task.spawn(function()
-		repeat task.wait() until store.matchState ~= 0 or not vapeInjected
+		repeat task.wait() until bedwarsStore.matchState ~= 0 or not vapeInjected
 		for i,v in pairs(collectionService:GetTagged("BedwarsItemShop")) do
 			table.insert(bedwarsshopnpcs, {Position = v.Position, TeamUpgradeNPC = true, Id = v.Name})
 		end
@@ -6649,7 +6638,7 @@ run(function()
 	end
 
 	local function getAxeNear(inv)
-		for i5, v5 in pairs(inv or store.localInventory.inventory.items) do
+		for i5, v5 in pairs(inv or bedwarsStore.localInventory.inventory.items) do
 			if v5.itemType:find("axe") and v5.itemType:find("pickaxe") == nil then
 				return v5.itemType
 			end
@@ -6658,7 +6647,7 @@ run(function()
 	end
 
 	local function getPickaxeNear(inv)
-		for i5, v5 in pairs(inv or store.localInventory.inventory.items) do
+		for i5, v5 in pairs(inv or bedwarsStore.localInventory.inventory.items) do
 			if v5.itemType:find("pickaxe") then
 				return v5.itemType
 			end
@@ -6701,7 +6690,7 @@ run(function()
 					end
 				end
 			end
-			if highestbuyable and (highestbuyable.ignoredByKit == nil or table.find(highestbuyable.ignoredByKit, store.equippedKit) == nil) then
+			if highestbuyable and (highestbuyable.ignoredByKit == nil or table.find(highestbuyable.ignoredByKit, bedwarsStore.equippedKit) == nil) then
 				buyItem(highestbuyable)
 			end
 		end,
@@ -6724,7 +6713,7 @@ run(function()
 					end
 				end
 			end
-			if highestbuyable and (highestbuyable.ignoredByKit == nil or table.find(highestbuyable.ignoredByKit, store.equippedKit) == nil) then
+			if highestbuyable and (highestbuyable.ignoredByKit == nil or table.find(highestbuyable.ignoredByKit, bedwarsStore.equippedKit) == nil) then
 				buyItem(highestbuyable)
 			end
 		end
@@ -6741,9 +6730,9 @@ run(function()
 						local found, npctype, enchant, newid = nearNPC(AutoBuyRange.Value)
 						id = newid
 						if found then
-							local inv = store.localInventory.inventory
+							local inv = bedwarsStore.localInventory.inventory
 							local currentupgrades = bedwars.ClientStoreHandler:getState().Bedwars.teamUpgrades
-							if store.equippedKit == "dasher" then
+							if bedwarsStore.equippedKit == "dasher" then
 								swords = {
 									[1] = "wood_dao",
 									[2] = "stone_dao",
@@ -6751,11 +6740,11 @@ run(function()
 									[4] = "diamond_dao",
 									[5] = "emerald_dao"
 								}
-							elseif store.equippedKit == "ice_queen" then
+							elseif bedwarsStore.equippedKit == "ice_queen" then
 								swords[5] = "ice_sword"
-							elseif store.equippedKit == "ember" then
+							elseif bedwarsStore.equippedKit == "ember" then
 								swords[5] = "infernal_saber"
-							elseif store.equippedKit == "lumen" then
+							elseif bedwarsStore.equippedKit == "lumen" then
 								swords[5] = "light_sword"
 							end
 							if (AutoBuyGui.Enabled == false or (bedwars.AppController:isAppOpen("BedwarsItemShopApp") or bedwars.AppController:isAppOpen("BedwarsTeamUpgradeApp"))) and (not enchant) then
@@ -6854,7 +6843,7 @@ run(function()
 						})
 						AutoConsumeDelay = tick() + 0.6
 					else
-						local newray = workspace:Raycast((oldcloneroot or entityLibrary.character.HumanoidRootPart).Position, Vector3.new(0, -76, 0), store.blockRaycast)
+						local newray = workspace:Raycast((oldcloneroot or entityLibrary.character.HumanoidRootPart).Position, Vector3.new(0, -76, 0), bedwarsStore.blockRaycast)
 						if newray ~= nil then
 							bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(pot.tool, "heal_splash_potion", "heal_splash_potion", (oldcloneroot or entityLibrary.character.HumanoidRootPart).Position, (oldcloneroot or entityLibrary.character.HumanoidRootPart).Position, Vector3.new(0, -70, 0), game:GetService("HttpService"):GenerateGUID(), {drawDurationSeconds = 1})
 						end
@@ -6947,7 +6936,7 @@ run(function()
 	end
 
 	local function findinhotbar(item)
-		for i,v in pairs(store.localInventory.hotbar) do
+		for i,v in pairs(bedwarsStore.localInventory.hotbar) do
 			if v.item and v.item.itemType == item.itemType then
 				return i, v.item
 			end
@@ -6955,7 +6944,7 @@ run(function()
 	end
 
 	local function findininventory(item)
-		for i,v in pairs(store.localInventory.inventory.items) do
+		for i,v in pairs(bedwarsStore.localInventory.inventory.items) do
 			if v.itemType == item.itemType then
 				return v
 			end
@@ -6967,11 +6956,11 @@ run(function()
 			if AutoHotbarActive then return end
 			AutoHotbarActive = true
 			local items = (AutoHotbarList.Hotbars[AutoHotbarList.CurrentlySelected] and AutoHotbarList.Hotbars[AutoHotbarList.CurrentlySelected].Items or {})
-			for i, v in pairs(store.localInventory.inventory.items) do
+			for i, v in pairs(bedwarsStore.localInventory.inventory.items) do
 				local customItem
 				local hotbarslot = findItemInTable(items, v)
 				if hotbarslot then
-					local oldhotbaritem = store.localInventory.hotbar[tonumber(hotbarslot)]
+					local oldhotbaritem = bedwarsStore.localInventory.hotbar[tonumber(hotbarslot)]
 					if oldhotbaritem.item and oldhotbaritem.item.itemType == v.itemType then continue end
 					if oldhotbaritem.item then
 						bedwars.ClientStoreHandler:dispatch({
@@ -7084,9 +7073,9 @@ run(function()
 				oldfish = bedwars.FishermanController.startMinigame
 				bedwars.FishermanController.startMinigame = function(Self, dropdata, func) func({win = true}) end
 				task.spawn(function()
-					repeat task.wait() until store.equippedKit ~= ""
+					repeat task.wait() until bedwarsStore.equippedKit ~= ""
 					if AutoKit.Enabled then
-						if store.equippedKit == "melody" then
+						if bedwarsStore.equippedKit == "melody" then
 							task.spawn(function()
 								repeat
 									task.wait(0.1)
@@ -7101,7 +7090,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "bigman" then
+						elseif bedwarsStore.equippedKit == "bigman" then
 							task.spawn(function()
 								repeat
 									task.wait()
@@ -7118,7 +7107,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "metal_detector" then
+						elseif bedwarsStore.equippedKit == "metal_detector" then
 							task.spawn(function()
 								repeat
 									task.wait()
@@ -7132,7 +7121,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "battery" then
+						elseif bedwarsStore.equippedKit == "battery" then
 							task.spawn(function()
 								repeat
 									task.wait()
@@ -7146,7 +7135,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "grim_reaper" then
+						elseif bedwarsStore.equippedKit == "grim_reaper" then
 							task.spawn(function()
 								repeat
 									task.wait()
@@ -7161,7 +7150,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "farmer_cletus" then
+						elseif bedwarsStore.equippedKit == "farmer_cletus" then
 							task.spawn(function()
 								repeat
 									task.wait()
@@ -7180,7 +7169,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "pinata" then
+						elseif bedwarsStore.equippedKit == "pinata" then
 							task.spawn(function()
 								repeat
 									task.wait()
@@ -7192,7 +7181,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "dragon_slayer" then
+						elseif bedwarsStore.equippedKit == "dragon_slayer" then
 							task.spawn(function()
 								repeat
 									task.wait(0.1)
@@ -7212,7 +7201,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "mage" then
+						elseif bedwarsStore.equippedKit == "mage" then
 							task.spawn(function()
 								repeat
 									task.wait(0.1)
@@ -7244,7 +7233,7 @@ run(function()
 									end
 								until (not AutoKit.Enabled)
 							end)
-						elseif store.equippedKit == "angel" then
+						elseif bedwarsStore.equippedKit == "angel" then
 							table.insert(AutoKit.Connections, vapeEvents.AngelProgress.Event:Connect(function(angelTable)
 								task.wait(0.5)
 								if not AutoKit.Enabled then return end
@@ -7254,7 +7243,7 @@ run(function()
 									})
 								end
 							end))
-						elseif store.equippedKit == "miner" then
+						elseif bedwarsStore.equippedKit == "miner" then
 							task.spawn(function()
 								repeat 
 									task.wait(0.1)
@@ -7302,9 +7291,9 @@ run(function()
 	local AutoForgeNotification = {Enabled = true}
 
 	local function buyForge(i)
-		if not store.forgeUpgrades[i] or store.forgeUpgrades[i] < 6 then
-			local cost = bedwars.ForgeUtil:getUpgradeCost(1, store.forgeUpgrades[i] or 0)
-			if store.forgeMasteryPoints >= cost then
+		if not bedwarsStore.forgeUpgrades[i] or bedwarsStore.forgeUpgrades[i] < 6 then
+			local cost = bedwars.ForgeUtil:getUpgradeCost(1, bedwarsStore.forgeUpgrades[i] or 0)
+			if bedwarsStore.forgeMasteryPoints >= cost then
 				if AutoForgeNotification.Enabled then
 					local forgeType = "none"
 					for name,v in pairs(bedwars.ForgeConstants) do
@@ -7325,7 +7314,7 @@ run(function()
 				task.spawn(function()
 					repeat
 						task.wait()
-						if store.matchState == 1 and entityLibrary.isAlive then
+						if bedwarsStore.matchState == 1 and entityLibrary.isAlive then
 							if entityLibrary.character.HumanoidRootPart.Velocity.Magnitude > 0.01 then continue end
 							if AutoForgeArmor.Enabled then buyForge(bedwars.ForgeConstants.ARMOR) end
 							if entityLibrary.character.HumanoidRootPart.Velocity.Magnitude > 0.01 then continue end
@@ -7333,7 +7322,7 @@ run(function()
 							if entityLibrary.character.HumanoidRootPart.Velocity.Magnitude > 0.01 then continue end
 							if AutoForgeSword.Enabled then
 								if AutoForgeBuyAfter.Enabled then
-									if not store.forgeUpgrades[bedwars.ForgeConstants.ARMOR] or store.forgeUpgrades[bedwars.ForgeConstants.ARMOR] < 6 then continue end
+									if not bedwarsStore.forgeUpgrades[bedwars.ForgeConstants.ARMOR] or bedwarsStore.forgeUpgrades[bedwars.ForgeConstants.ARMOR] < 6 then continue end
 								end
 								local weapon = bedwars.ForgeConstants[AutoForgeWeapon.Value:upper()]
 								if weapon then buyForge(weapon) end
@@ -7390,7 +7379,7 @@ run(function()
 								task.wait(1)
 								alreadyreportedlist[v] = true
 								bedwars.Client:Get(bedwars.ReportRemote):SendToServer(v.UserId)
-								store.statistics.reported = store.statistics.reported + 1
+								bedwarsStore.statistics.reported = bedwarsStore.statistics.reported + 1
 								if AutoReportV2Notify.Enabled then
 									warningNotification("AutoReportV2", "Reported "..v.Name, 15)
 								end
@@ -7541,7 +7530,7 @@ run(function()
 					elseif AutoToxicBedBreak.Enabled and bedTable.player.UserId == lplr.UserId then
 						local custommsg = #AutoToxicPhrases7.ObjectList > 0 and AutoToxicPhrases7.ObjectList[math.random(1, #AutoToxicPhrases7.ObjectList)] or 'Your bed has been sent to the abyss <teamname>! | .gg/voidware'
 						if custommsg then
-							local team = bedwars.QueueMeta[store.queueType].teams[tonumber(bedTable.brokenBedTeam.id)]
+							local team = bedwars.QueueMeta[bedwarsStore.queueType].teams[tonumber(bedTable.brokenBedTeam.id)]
 							local teamname = team and team.displayName:lower() or 'white'
 							custommsg = custommsg:gsub('<teamname>', teamname)
 						end
@@ -7749,8 +7738,8 @@ run(function()
 		Function = function(callback)
 			if callback then
 				task.spawn(function()
-					repeat task.wait() until store.queueType ~= "bedwars_test"
-					if (not ChestStealerSkywars.Enabled) or store.queueType:find("skywars") then
+					repeat task.wait() until bedwarsStore.queueType ~= "bedwars_test"
+					if (not ChestStealerSkywars.Enabled) or bedwarsStore.queueType:find("skywars") then
 						repeat
 							task.wait(0.1)
 							if entityLibrary.isAlive then
@@ -7798,7 +7787,7 @@ run(function()
 				task.spawn(function()
 					repeat
 						task.wait()
-						if entityLibrary.isAlive and (not store.localInventory.opened) and (inputService:IsKeyDown(Enum.KeyCode.Q) or inputService:IsKeyDown(Enum.KeyCode.Backspace)) and inputService:GetFocusedTextBox() == nil then
+						if entityLibrary.isAlive and (not bedwarsStore.localInventory.opened) and (inputService:IsKeyDown(Enum.KeyCode.Q) or inputService:IsKeyDown(Enum.KeyCode.Backspace)) and inputService:GetFocusedTextBox() == nil then
 							task.spawn(bedwars.DropItem)
 						end
 					until (not FastDrop.Enabled)
@@ -8125,7 +8114,7 @@ run(function()
 		local closest, closestmag = nil, newmag * 3
 		if entityLibrary.isAlive then
 			local tops = {}
-			for i,v in pairs(store.blocks) do
+			for i,v in pairs(bedwarsStore.blocks) do
 				local close = getScaffold(closestpos(v), false)
 				if getPlacedBlock(close) then continue end
 				if close.Y < entityLibrary.character.HumanoidRootPart.Position.Y then continue end
@@ -8201,7 +8190,7 @@ run(function()
 					end)
 					repeat
 						if entityLibrary.isAlive and AntiVoidMoveMode.Value == "Normal" then
-							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -1000, 0), store.blockRaycast)
+							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -1000, 0), bedwarsStore.blockRaycast)
 							if ray or GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled or GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled then
 								AntiVoidPart.Position = entityLibrary.character.HumanoidRootPart.Position - Vector3.new(0, 21, 0)
 							end
@@ -8223,11 +8212,11 @@ run(function()
 		Function = function(val)
 			if val == "Classic" then
 				task.spawn(function()
-					repeat task.wait() until store.matchState ~= 0 or not vapeInjected
+					repeat task.wait() until bedwarsStore.matchState ~= 0 or not vapeInjected
 					if vapeInjected and AntiVoidMoveMode.Value == "Classic" and antivoidypos == 0 and AntiVoid.Enabled then
 						local lowestypos = 99999
-						for i,v in pairs(store.blocks) do
-							local newray = workspace:Raycast(v.Position + Vector3.new(0, 800, 0), Vector3.new(0, -1000, 0), store.blockRaycast)
+						for i,v in pairs(bedwarsStore.blocks) do
+							local newray = workspace:Raycast(v.Position + Vector3.new(0, 800, 0), Vector3.new(0, -1000, 0), bedwarsStore.blockRaycast)
 							if i % 200 == 0 then
 								task.wait(0.06)
 							end
@@ -8285,7 +8274,7 @@ run(function()
 			if callback then
 				oldhitblock = bedwars.BlockBreaker.hitBlock
 				bedwars.BlockBreaker.hitBlock = function(self, maid, raycastparams, ...)
-					if (GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled == false or store.matchState ~= 0) then
+					if (GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled == false or bedwarsStore.matchState ~= 0) then
 						local block = self.clientManager:getBlockSelector():getMouseInfo(1, {ray = raycastparams})
 						if block and block.target and not block.target.blockInstance:GetAttribute("NoBreak") and not block.target.blockInstance:GetAttribute("Team"..(lplr:GetAttribute("Team") or 0).."NoBreak") then
 							if switchToAndUseTool(block.target.blockInstance, true) then return end
@@ -8409,7 +8398,7 @@ run(function()
 		Name = "Nuker",
 		Function = function(callback)
 			if callback then
-				for i,v in pairs(store.blocks) do
+				for i,v in pairs(bedwarsStore.blocks) do
 					if table.find(nukercustom.ObjectList, v.Name) or (nukerluckyblock.Enabled and v.Name:find("lucky")) or (nukerironore.Enabled and v.Name == "iron_ore") then
 						table.insert(luckyblocktable, v)
 					end
@@ -8428,7 +8417,7 @@ run(function()
 					repeat
 						if (not nukernofly.Enabled or not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) then
 							local broke = not entityLibrary.isAlive
-							local tool = (not nukerlegit.Enabled) and {Name = "wood_axe"} or store.localHand.tool
+							local tool = (not nukerlegit.Enabled) and {Name = "wood_axe"} or bedwarsStore.localHand.tool
 							if nukerbeds.Enabled then
 								for i, obj in pairs(collectionService:GetTagged("bed")) do
 									if broke then break end
@@ -8514,7 +8503,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				luckyblocktable = {}
-				for i,v in pairs(store.blocks) do
+				for i,v in pairs(bedwarsStore.blocks) do
 					if table.find(nukercustom.ObjectList, v.Name) or (nukerluckyblock.Enabled and v.Name:find("lucky")) or (nukerironore.Enabled and v.Name == "iron_ore") then
 						table.insert(luckyblocktable, v)
 					end
@@ -8530,7 +8519,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				luckyblocktable = {}
-				for i,v in pairs(store.blocks) do
+				for i,v in pairs(bedwarsStore.blocks) do
 					if table.find(nukercustom.ObjectList, v.Name) or (nukerluckyblock.Enabled and v.Name:find("lucky")) or (nukerironore.Enabled and v.Name == "iron_ore") then
 						table.insert(luckyblocktable, v)
 					end
@@ -8545,7 +8534,7 @@ run(function()
 		TempText = "block (tesla_trap)",
 		AddFunction = function()
 			luckyblocktable = {}
-			for i,v in pairs(store.blocks) do
+			for i,v in pairs(bedwarsStore.blocks) do
 				if table.find(nukercustom.ObjectList, v.Name) or (nukerluckyblock.Enabled and v.Name:find("lucky")) then
 					table.insert(luckyblocktable, v)
 				end
@@ -8582,10 +8571,10 @@ run(function()
 								end
 							end
 						else
-							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position + vec, Vector3.new(0, -1000, 0), store.blockRaycast)
-							local ray2 = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -entityLibrary.character.Humanoid.HipHeight * 2, 0), store.blockRaycast)
+							local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position + vec, Vector3.new(0, -1000, 0), bedwarsStore.blockRaycast)
+							local ray2 = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -entityLibrary.character.Humanoid.HipHeight * 2, 0), bedwarsStore.blockRaycast)
 							if ray == nil and ray2 then
-								local ray3 = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position + (vec * 1.8), Vector3.new(0, -1000, 0), store.blockRaycast)
+								local ray3 = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position + (vec * 1.8), Vector3.new(0, -1000, 0), bedwarsStore.blockRaycast)
 								if ray3 == nil then
 									vec = Vector3.zero
 								end
@@ -8863,7 +8852,7 @@ run(function()
 						if item and lplr.Character.HandInvItem.Value == item.tool and bedwars.CombatController then
 							bedwars.Client:Get("ScytheDash"):SendToServer({direction = Vector3.new(9e9, 9e9, 9e9)})
 							if entityLibrary.isAlive and entityLibrary.character.Head.Transparency ~= 0 then
-								store.scythe = tick() + 1
+								bedwarsStore.scythe = tick() + 1
 							end
 						end
 					until (not Disabler.Enabled)
@@ -8875,8 +8864,8 @@ run(function()
 end)
 
 run(function()
-	store.TPString = shared.vapeoverlay or nil
-	local origtpstring = store.TPString
+	bedwarsStore.TPString = shared.vapeoverlay or nil
+	local origtpstring = bedwarsStore.TPString
 	local Overlay = GuiLibrary.CreateCustomWindow({
 		Name = "Overlay",
 		Icon = "vape/assets/TargetIcon1.png",
@@ -9008,7 +8997,7 @@ run(function()
 
 				table.insert(overlayconnections, vapeEvents.BedwarsBedBreak.Event:Connect(function(bedTable)
 					if bedTable.player.UserId == lplr.UserId then
-						store.statistics.beds = store.statistics.beds + 1
+						bedwarsStore.statistics.beds = bedwarsStore.statistics.beds + 1
 					end
 				end))
 
@@ -9026,7 +9015,7 @@ run(function()
 						local killed = playersService:GetPlayerFromCharacter(deathTable.entityInstance)
 						if not killed or not killer then return end
 						if killed ~= lplr and killer == lplr then
-							store.statistics.kills = store.statistics.kills + 1
+							bedwarsStore.statistics.kills = bedwarsStore.statistics.kills + 1
 						end
 					end
 				end))
@@ -9039,15 +9028,15 @@ run(function()
 						end
 						table.insert(pinglist, ping)
 						task.wait(1)
-						if store.matchState ~= matchstatechanged then
-							if store.matchState == 1 then
+						if bedwarsStore.matchState ~= matchstatechanged then
+							if bedwarsStore.matchState == 1 then
 								matchstatetick = tick() + 3
 							end
-							matchstatechanged = store.matchState
+							matchstatechanged = bedwarsStore.matchState
 						end
-						if not store.TPString then
-							store.TPString = tick().."/"..store.statistics.kills.."/"..store.statistics.beds.."/"..(victorysaid and 1 or 0).."/"..(1).."/"..(0).."/"..(0).."/"..(0)
-							origtpstring = store.TPString
+						if not bedwarsStore.TPString then
+							bedwarsStore.TPString = tick().."/"..bedwarsStore.statistics.kills.."/"..bedwarsStore.statistics.beds.."/"..(victorysaid and 1 or 0).."/"..(1).."/"..(0).."/"..(0).."/"..(0)
+							origtpstring = bedwarsStore.TPString
 						end
 						if entityLibrary.isAlive and (not oldcloneroot) then
 							local newnetworkowner = isnetworkowner(entityLibrary.character.HumanoidRootPart)
@@ -9057,7 +9046,7 @@ run(function()
 									task.delay(1, function()
 										local falseflag = didpingspike()
 										if not falseflag then
-											store.statistics.lagbacks = store.statistics.lagbacks + 1
+											bedwarsStore.statistics.lagbacks = bedwarsStore.statistics.lagbacks + 1
 										end
 									end)
 								end
@@ -9076,7 +9065,7 @@ run(function()
 									if teleported[v.Player] or teleported2[v.Player] or matchstatetick > tick() or math.abs(v.Player:GetAttribute("SpawnTime") - v.Player:GetAttribute("LastTeleported")) < 3 or (teleportedability[v.Player] or tick() - 1) > tick() then break end
 								end
 								if v.Player ~= nil and (not v.Player.Neutral) and teleported[v.Player] == nil and teleported2[v.Player] == nil and (teleportedability[v.Player] or tick() - 1) < tick() and math.abs(v.Player:GetAttribute("SpawnTime") - v.Player:GetAttribute("LastTeleported")) > 3 and matchstatetick <= tick() then
-									store.statistics.universalLagbacks = store.statistics.universalLagbacks + 1
+									bedwarsStore.statistics.universalLagbacks = bedwarsStore.statistics.universalLagbacks + 1
 									vapeEvents.LagbackEvent:Fire(v.Player)
 								end
 								teleported[v.Player] = nil
@@ -9089,10 +9078,10 @@ run(function()
 							end)
 						end
 						local splitted = origtpstring:split("/")
-						label.Text = "Session Info\nTime Played : "..os.date("!%X",math.floor(tick() - splitted[1])).."\nKills : "..(splitted[2] + store.statistics.kills).."\nBeds : "..(splitted[3] + store.statistics.beds).."\nWins : "..(splitted[4] + (victorysaid and 1 or 0)).."\nGames : "..splitted[5].."\nLagbacks : "..(splitted[6] + store.statistics.lagbacks).."\nUniversal Lagbacks : "..(splitted[7] + store.statistics.universalLagbacks).."\nReported : "..(splitted[8] + store.statistics.reported).."\nMap : "..mapname
+						label.Text = "Session Info\nTime Played : "..os.date("!%X",math.floor(tick() - splitted[1])).."\nKills : "..(splitted[2] + bedwarsStore.statistics.kills).."\nBeds : "..(splitted[3] + bedwarsStore.statistics.beds).."\nWins : "..(splitted[4] + (victorysaid and 1 or 0)).."\nGames : "..splitted[5].."\nLagbacks : "..(splitted[6] + bedwarsStore.statistics.lagbacks).."\nUniversal Lagbacks : "..(splitted[7] + bedwarsStore.statistics.universalLagbacks).."\nReported : "..(splitted[8] + bedwarsStore.statistics.reported).."\nMap : "..mapname
 						local textsize = textService:GetTextSize(label.Text, label.TextSize, label.Font, Vector2.new(9e9, 9e9))
 						overlayframe.Size = UDim2.new(0, math.max(textsize.X + 19, 200), 0, (textsize.Y * 1.2) + 6)
-						store.TPString = splitted[1].."/"..(splitted[2] + store.statistics.kills).."/"..(splitted[3] + store.statistics.beds).."/"..(splitted[4] + (victorysaid and 1 or 0)).."/"..(splitted[5] + 1).."/"..(splitted[6] + store.statistics.lagbacks).."/"..(splitted[7] + store.statistics.universalLagbacks).."/"..(splitted[8] + store.statistics.reported)
+						bedwarsStore.TPString = splitted[1].."/"..(splitted[2] + bedwarsStore.statistics.kills).."/"..(splitted[3] + bedwarsStore.statistics.beds).."/"..(splitted[4] + (victorysaid and 1 or 0)).."/"..(splitted[5] + 1).."/"..(splitted[6] + bedwarsStore.statistics.lagbacks).."/"..(splitted[7] + bedwarsStore.statistics.universalLagbacks).."/"..(splitted[8] + bedwarsStore.statistics.reported)
 					until not overlayenabled
 				end)
 			else
@@ -9126,7 +9115,7 @@ run(function()
 						if item and lplr.Character.HandInvItem.Value == item.tool and bedwars.CombatController then
 							bedwars.Client:Get("ScytheDash"):SendToServer({direction = Vector3.new(9e9, 9e9, 9e9)})
 							if entityLibrary.isAlive and entityLibrary.character.Head.Transparency ~= 0 then
-								store.scythe = tick() + 1
+								bedwarsStore.scythe = tick() + 1
 							end
 						end
 					until (not Disabler.Enabled)
@@ -9149,7 +9138,7 @@ run(function()
 				task.spawn(function()
 					repeat
 						task.wait(0.4)
-						ReachLabel.Text = store.attackReachUpdate > tick() and store.attackReach.." studs" or "0.00 studs"
+						ReachLabel.Text = bedwarsStore.attackReachUpdate > tick() and bedwarsStore.attackReach.." studs" or "0.00 studs"
 					until (not ReachDisplay.Enabled)
 				end)
 			end
@@ -9176,7 +9165,7 @@ task.spawn(function()
 	end
 end)
 
-shared.GlobalStore = store
+shared.GlobalStore = bedwarsStore
 shared.GlobalBedwars = bedwars
 shared.VapeBWLoaded = true
 local function createMonitoredTable(originalTable, onChange)
@@ -9196,12 +9185,12 @@ local function createMonitoredTable(originalTable, onChange)
 end
 local function onChange(key, oldValue, newValue)
    --print("Changed key:", key, "from", oldValue, "to", newValue)
-    shared.GlobalStore = store
+    shared.GlobalStore = bedwarsStore
 end
 local function onChange2(key, oldValue, newValue)
 	--print("Changed key:", key, "from", oldValue, "to", newValue)
 	 shared.GlobalBedwars = bedwars
  end
 
-store = createMonitoredTable(store, onChange)
+bedwarsStore = createMonitoredTable(bedwarsStore, onChange)
 bedwars = createMonitoredTable(bedwars, onChange2)
