@@ -2942,75 +2942,8 @@ run(function()
     })
 end)--]]
 
-run(function()
-	function IsAlive(plr)
-		plr = plr or lplr
-		if not plr.Character then return false end
-		if not plr.Character:FindFirstChild("Head") then return false end
-		if not plr.Character:FindFirstChild("Humanoid") then return false end
-		if plr.Character:FindFirstChild("Humanoid").Health < 0.11 then return false end
-		return true
-	end
-	local GodMode = {Enabled = false}
-	GodMode = GuiLibrary.ObjectsThatCanBeSaved.HotWindow.Api.CreateOptionsButton({
-		Name = "AntiHit/Godmode",
-		Function = function(callback)
-			if callback then
-				spawn(function()
-					while task.wait() do
-						if (not GodMode.Enabled) then return end
-						if (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled) then
-							for i, v in pairs(game:GetService("Players"):GetChildren()) do
-								if v.Team ~= lplr.Team and IsAlive(v) and IsAlive(lplr) then
-									if v and v ~= lplr then
-										local TargetDistance = lplr:DistanceFromCharacter(v.Character:FindFirstChild("HumanoidRootPart").CFrame.p)
-										if TargetDistance < 25 then
-											if not lplr.Character.HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
-												repeat task.wait() until shared.GlobalStore.matchState ~= 0
-												if not (v.Character.HumanoidRootPart.Velocity.Y < -10*5) then
-													lplr.Character.Archivable = true
-			
-													local Clone = lplr.Character:Clone()
-													Clone.Parent = workspace
-													Clone.Head:ClearAllChildren()
-													gameCamera.CameraSubject = Clone:FindFirstChild("Humanoid")
-				
-													for i,v in pairs(Clone:GetChildren()) do
-														if string.lower(v.ClassName):find("part") and v.Name ~= "HumanoidRootPart" then
-															v.Transparency = 1
-														end
-														if v:IsA("Accessory") then
-															v:FindFirstChild("Handle").Transparency = 1
-														end
-													end
-				
-													lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(0,100000,0)
-				
-													game:GetService("RunService").RenderStepped:Connect(function()
-														if Clone ~= nil and Clone:FindFirstChild("HumanoidRootPart") then
-															Clone.HumanoidRootPart.Position = Vector3.new(lplr.Character.HumanoidRootPart.Position.X, Clone.HumanoidRootPart.Position.Y, lplr.Character.HumanoidRootPart.Position.Z)
-														end
-													end)
-				
-													task.wait(0.3)
-													lplr.Character.HumanoidRootPart.Velocity = Vector3.new(lplr.Character.HumanoidRootPart.Velocity.X, -1, lplr.Character.HumanoidRootPart.Velocity.Z)
-													lplr.Character.HumanoidRootPart.CFrame = Clone.HumanoidRootPart.CFrame
-													gameCamera.CameraSubject = lplr.Character:FindFirstChild("Humanoid")
-													Clone:Destroy()
-													task.wait(0.15)
-												end
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end)
-			end
-		end
-	})
-end)
+
+
 
 --[[run(function()
 	local MelodyExploit = {Enabled = false}
