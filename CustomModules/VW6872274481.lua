@@ -3838,6 +3838,8 @@ VoidwareFunctions.GlobaliseObject("EntityNearPosition", EntityNearPosition)
 	})
 end)--]]
 
+-- no worky (real)
+--[[
 run(function()
 	local Autowin = {Enabled = false}
 	local AutowinNotification = {Enabled = true}
@@ -3955,6 +3957,7 @@ run(function()
 		HoverText = "best paid autowin 2023!1!!! rel11!11!1"
 	})
 end)
+]]
 
 --[[run(function()
 	local function getItemNear(itemName, inv)
