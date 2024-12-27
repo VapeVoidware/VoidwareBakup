@@ -177,7 +177,7 @@ local function vapeGithubRequest(scripturl, isImportant)
     end
     local suc, res
     local url = (scripturl == "MainScript.lua" or scripturl == "GuiLibrary.lua") and shared.RiseMode and "https://raw.githubusercontent.com/VapeVoidware/VWRise/" or "https://raw.githubusercontent.com/VapeVoidware/VoidwareBakup/"
-    suc, res = pcall(function() return game:HttpGet(url.."main/"..scripturl, true) end)
+    suc, res = pcall(function() return game:HttpGet(url.."test/"..scripturl, true) end)
     if not suc or res == "404: Not Found" then
         if isImportant then
             game:GetService("Players").LocalPlayer:Kick("Failed to connect to github : "..baseDirectory..scripturl.." : "..res)
