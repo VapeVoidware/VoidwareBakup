@@ -560,9 +560,9 @@ end)
     local AllowedEditMethods = {["Place"] = true,["Username"] = true,["RP"] = true, ["CrownIconColor"] = true, ["RankIcon"] = true, ["RankName"] = true}
     local ExtraFunctions = {extractUsername = function(richText) return richText:match("@</font></b>(.+)") end, extractNumberBeforeRP = function(text) return tonumber(text:match("<b>(%d+)%sRP</b>")) end, extractBoldText = function(text) return text:match("<b>(.-)</b>") end, resolvePlayerUserID = function(username) return game:GetService("Players"):GetUserIdFromNameAsync(username) end, resolveProfileImage = function(userid) return "rbxthumb://type=AvatarHeadShot&id="..tostring(userid).."&w=60&h=60" end, resolveUsername = function(username) return string.format('<b><font color="rgb(185, 188, 255)">@</font></b>%s', username) end, resolveNumberBeforeRP = function(number) return string.format('<b>%d RP</b>', number) end, resolveBoldText = function(text) return string.format('<b>%s</b>', text) end, resolveIconID = function(iconName) return RankIconTable[iconName] end, fetchDefaultTable = function() return {Place = nil, CrownIcon = nil, User = {Name = nil, Profile = nil}, Rank = {Name = nil, Icon = nil, RP = nil}} end}
     local function getBoard()
-        --assert(game.workspace:findFirstChild("Lobby") and game.workspace:findFirstChild("Lobby").ClassName == "Folder", "Error finding Lobby folder in workspace!")
+        --assert(game.game.Workspace:findFirstChild("Lobby") and game.game.Workspace:findFirstChild("Lobby").ClassName == "Folder", "Error finding Lobby folder in game.Workspace!")
         local suc, Leaderboard, Statboard = false, "Not found", "Not found"
-        for i,v in pairs(game.workspace:WaitForChild("Lobby"):GetChildren()) do
+        for i,v in pairs(game.game.Workspace:WaitForChild("Lobby"):GetChildren()) do
             if v.Name == "Podium" and v.ClassName == "Model" and v:FindFirstChild("Boards") then
                 if v:FindFirstChild("Boards").ClassName == "Folder" then
                     suc = true
@@ -893,7 +893,7 @@ run(function()
 						end
 						if #convertedData < 1 then warningNotification("ReportDetector", "No reports found for " .. targetUsername .. "!", 10) end
                         writefile("ReportDetectorLog.json", game:GetService("HttpService"):JSONEncode(saveTable))
-                        warningNotification("ReportDetector_LogSaver", "Successfully saved the report logs to ReportDetectorLog.json in your \n executor's workspace folder!", 10)
+                        warningNotification("ReportDetector_LogSaver", "Successfully saved the report logs to ReportDetectorLog.json in your \n executor's game.Workspace folder!", 10)
 					else
 						errorNotification("ReportDetector", "Data sorting failed: " .. resolvedData.Error, 10)
 					end

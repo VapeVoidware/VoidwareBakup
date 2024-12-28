@@ -20,7 +20,7 @@ local coreGui = cloneref(game:GetService('CoreGui'))
 local tweenService = cloneref(game:GetService('TweenService'))
 local runService = cloneref(game:GetService('RunService'))
 
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 local assetfunction = getcustomasset
 
@@ -199,7 +199,7 @@ run(function()
 		if not char then return end
 		entitylib.EntityThreads[char] = task.spawn(function()
 			local hum = waitForChildOfType(char, 'Humanoid', 10)
-			local humrootpart = hum and waitForChildOfType(hum, 'RootPart', workspace.StreamingEnabled and 9e9 or 10, true)
+			local humrootpart = hum and waitForChildOfType(hum, 'RootPart', game.Workspace.StreamingEnabled and 9e9 or 10, true)
 			local head = char:WaitForChild('Head', 10) or humrootpart
 
 			if hum and humrootpart then
@@ -370,17 +370,17 @@ run(function()
 		until vape.Loaded == nil
 	end)
 
-	vape:Clean(workspace.BlockContainer.DescendantAdded:Connect(function(v)
+	vape:Clean(game.Workspace.BlockContainer.DescendantAdded:Connect(function(v)
 		parsePositions(v, function(pos) 
 			store.blocks[pos] = v 
 		end)
 	end))
-	vape:Clean(workspace.BlockContainer.DescendantRemoving:Connect(function(v)
+	vape:Clean(game.Workspace.BlockContainer.DescendantRemoving:Connect(function(v)
 		parsePositions(v, function(pos) 
 			store.blocks[pos] = nil 
 		end)
 	end))
-	for _, v in workspace.BlockContainer:GetDescendants() do
+	for _, v in game.Workspace.BlockContainer:GetDescendants() do
 		parsePositions(v, function(pos) 
 			store.blocks[pos] = v 
 		end)
@@ -604,7 +604,7 @@ run(function()
 					part.CanCollide = Mode.Value == 'Collide'
 					part.Anchored = true
 					part.CanQuery = false
-					part.Parent = workspace
+					part.Parent = game.Workspace
 					AntiFall:Clean(part)
 					AntiFall:Clean(part.Touched:Connect(function(touchedpart)
 						if touchedpart.Parent == lplr.Character and entitylib.isAlive and debounce < tick() then
@@ -1032,7 +1032,7 @@ run(function()
 						local hum = entitylib.character.Humanoid
 						if (entitylib.character.GroundPosition.Y - entitylib.character.RootPart.Position.Y) > 10 then
 							rayCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
-							local ray = workspace:Raycast(entitylib.character.RootPart.Position, Vector3.new(0, -(entitylib.character.HipHeight + 10), 0), rayCheck)
+							local ray = game.Workspace:Raycast(entitylib.character.RootPart.Position, Vector3.new(0, -(entitylib.character.HipHeight + 10), 0), rayCheck)
 							if not ray then
 								hum:ChangeState(Enum.HumanoidStateType.Ragdoll)
 								task.wait(0.1)
@@ -1105,7 +1105,7 @@ run(function()
 				rayCheck.FilterDescendantsInstances = {plr.Character, gameCamera}
 				rayCheck.CollisionGroup = plr[TargetPart.Value].CollisionGroup
 				local offsetpos = entitylib.character.RootPart.CFrame * skywars.FireOrigin
-				local calc = prediction.SolveTrajectory(offsetpos.Position, 200, math.abs(skywars.Gravity), plr[TargetPart.Value].Position, plr[TargetPart.Value].Velocity, workspace.Gravity, plr.HipHeight, nil, rayCheck)
+				local calc = prediction.SolveTrajectory(offsetpos.Position, 200, math.abs(skywars.Gravity), plr[TargetPart.Value].Position, plr[TargetPart.Value].Velocity, game.Workspace.Gravity, plr.HipHeight, nil, rayCheck)
 				
 				if calc then
 					targetinfo.Targets[plr] = tick() + 1
@@ -1187,7 +1187,7 @@ run(function()
 							if (FireDelays[item] or 0) < tick() then
 								rayCheck.FilterDescendantsInstances = {ent.Character, gameCamera}
 								rayCheck.CollisionGroup = ent.RootPart.CollisionGroup
-								local calc = prediction.SolveTrajectory(offsetpos.Position, 200, math.abs(skywars.Gravity), ent.RootPart.Position, ent.RootPart.Velocity, workspace.Gravity, ent.HipHeight, nil, rayCheck)
+								local calc = prediction.SolveTrajectory(offsetpos.Position, 200, math.abs(skywars.Gravity), ent.RootPart.Position, ent.RootPart.Velocity, game.Workspace.Gravity, ent.HipHeight, nil, rayCheck)
 								
 								if calc then
 									targetinfo.Targets[ent] = tick() + 1
@@ -1579,7 +1579,7 @@ run(function()
 			part.Transparency = 1
 			part.Anchored = true
 			part.CanCollide = false
-			part.Parent = workspace
+			part.Parent = game.Workspace
 			BreakerPart = part
 	
 			BreakerUI = skywars.Roact.mount(create('BillboardGui', {

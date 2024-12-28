@@ -22,6 +22,7 @@ local mainapi = {
 	Version = '4.18',
 	Windows = {}
 }
+mainapi.ThreadFix = false
 
 local cloneref = cloneref or function(obj)
 	return obj
@@ -3803,7 +3804,7 @@ function mainapi:CreateCategory(categorysettings)
 
 		function moduleapi:SetBind(tab, mouse)
 			if tab.Mobile then
-				createMobileButton(object, Vector2.new(tab.X, tab.Y))
+				createMobileButton(moduleapi, Vector2.new(tab.X, tab.Y))
 				return
 			end
 
@@ -4383,6 +4384,7 @@ function mainapi:CreateCategoryList(categorysettings)
 	cursedpadding.BackgroundTransparency = 1
 	cursedpadding.Parent = children
 	categorysettings.Function = categorysettings.Function or function() end
+	categorysettings.Function = function() return pcall(function() categorysettings.Function() end) end
 
 	function categoryapi:ChangeValue(val)
 		if val then
@@ -4797,6 +4799,14 @@ function mainapi:CreateCategoryList(categorysettings)
 	self.Categories[categorysettings.Name] = categoryapi
 
 	return categoryapi
+end
+
+mainapi.RemoveObject = function(name)
+	name = tostring(name)
+	local suc, err = pcall(function()
+		mainapi:Remove(name:match("^(.-)OptionsButton") or name)
+	end)
+	return suc, err
 end
 
 function mainapi:CreateSearch()
@@ -6962,5 +6972,29 @@ mainapi:Clean(inputService.InputEnded:Connect(function(inputObj)
 		table.remove(mainapi.HeldKeybinds, ind)
 	end
 end))
+
+if inputService.TouchEnabled then
+	local button = Instance.new("TextButton")
+	button.Position = UDim2.new(1, -30, 0, 0)
+	button.Text = "Vape"
+	button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Size = UDim2.new(0, 30, 0, 20)
+	button.BorderSizePixel = 0
+	button.BackgroundTransparency = 0.5
+	button.Parent = gui
+	button.MouseButton1Click:Connect(function()
+		if mainapi.ThreadFix then
+			setthreadidentity(8)
+		end
+		for _, v in mainapi.Windows do
+			v.Visible = false
+		end
+		clickgui.Visible = not clickgui.Visible
+		tooltip.Visible = false
+		mainapi:BlurCheck()
+	end)
+	shared.VapeButton = button
+end
 
 return mainapi

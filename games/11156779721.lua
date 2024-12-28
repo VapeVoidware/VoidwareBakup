@@ -11,7 +11,7 @@ local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local runService = cloneref(game:GetService('RunService'))
 local tweenService = cloneref(game:GetService('TweenService'))
 
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 
 local vape = shared.vape
@@ -75,13 +75,13 @@ run(function()
 	entitylib.start = function()
 		oldstart()
 		if entitylib.Running then
-			for _, ent in workspace.AI_Client:GetChildren() do 
+			for _, ent in game.Workspace.AI_Client:GetChildren() do 
 				task.spawn(entitylib.addEntity, ent) 
 			end
-			table.insert(entitylib.Connections, workspace.AI_Client.ChildAdded:Connect(function(v) 
+			table.insert(entitylib.Connections, game.Workspace.AI_Client.ChildAdded:Connect(function(v) 
 				entitylib.addEntity(v) 
 			end))
-			table.insert(entitylib.Connections, workspace.AI_Client.ChildRemoved:Connect(function(v) 
+			table.insert(entitylib.Connections, game.Workspace.AI_Client.ChildRemoved:Connect(function(v) 
 				entitylib.removeEntity(v) 
 			end))
 		end
@@ -97,7 +97,7 @@ run(function()
 				MaxHealth = 100,
 				GetPropertyChangedSignal = function() end
 			}
-			local humrootpart = hum and waitForChildOfType(hum, 'RootPart', workspace.StreamingEnabled and 9e9 or 10, true)
+			local humrootpart = hum and waitForChildOfType(hum, 'RootPart', game.Workspace.StreamingEnabled and 9e9 or 10, true)
 			local head = char:WaitForChild('Head', 10) or humrootpart and {Name = 'Head', Size = Vector3.one, Parent = char}
 
 			if hum and humrootpart then
@@ -493,7 +493,7 @@ run(function()
 						if WallCheck.Enabled then
 							rayCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
 							rayCheck.CollisionGroup = root.CollisionGroup
-							local ray = workspace:Raycast(root.Position, destination, rayCheck)
+							local ray = game.Workspace:Raycast(root.Position, destination, rayCheck)
 							if ray then 
 								destination = ((ray.Position + ray.Normal) - root.Position) 
 							end
@@ -575,7 +575,7 @@ end)
 	
 run(function()
 	local AutoPickup
-	local dropped = workspace.droppedItems
+	local dropped = game.Workspace.droppedItems
 	local pickupRemote =  replicatedStorage.remoteInterface.inventory.pickupItem
 	local pickuptable = {}
 	local pickupdelay = {}
@@ -644,7 +644,7 @@ run(function()
 			part.Transparency = 1
 			part.Anchored = true
 			part.CanCollide = false
-			part.Parent = workspace
+			part.Parent = game.Workspace
 			BreakerPart = part
 			local billboard = Instance.new('BillboardGui')
 			billboard.Size = UDim2.fromOffset(249, 102)
@@ -747,17 +747,17 @@ run(function()
 			if callback then
 				local oldhp = -1
 	
-				for _, obj in workspace.worldResources:GetDescendants() do
+				for _, obj in game.Workspace.worldResources:GetDescendants() do
 					if obj:GetAttribute('health') then 
 						table.insert(BreakerObjects, obj) 
 					end
 				end
-				Breaker:Clean(workspace.worldResources.DescendantAdded:Connect(function(obj)
+				Breaker:Clean(game.Workspace.worldResources.DescendantAdded:Connect(function(obj)
 					if obj:GetAttribute('health') then 
 						table.insert(BreakerObjects, obj) 
 					end
 				end))
-				Breaker:Clean(workspace.worldResources.DescendantRemoving:Connect(function(obj)
+				Breaker:Clean(game.Workspace.worldResources.DescendantRemoving:Connect(function(obj)
 					local ind = table.find(BreakerObjects, obj)
 					if ind then 
 						table.remove(BreakerObjects, ind) 
@@ -769,7 +769,7 @@ run(function()
 					if obj then
 						local axe, pickaxe = getTool('axeStrength'), getTool('pickaxeStrength')
 						local done
-						if obj:IsDescendantOf(workspace.worldResources.mineable) then 
+						if obj:IsDescendantOf(game.Workspace.worldResources.mineable) then 
 							if pickaxe then
 								done = true
 								mine:FireServer(pickaxe, obj, obj.PrimaryPart.CFrame)

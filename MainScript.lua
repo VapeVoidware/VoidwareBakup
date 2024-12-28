@@ -10,7 +10,7 @@ local errorPopupShown = false
 local redownloadedAssets = false
 local profilesLoaded = false
 local teleportedServers = false
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local textService = game:GetService("TextService")
 local playersService = game:GetService("Players")
 local inputService = game:GetService("UserInputService")
@@ -146,7 +146,7 @@ local function vapeGithubRequest(scripturl)
 				displayErrorPopup("The connection to github is taking a while, Please be patient.")
 			end
 		end)
-		suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VoidwareBakup/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
+		suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VoidwareBakup/main/"..scripturl, true) end)
 		if not suc or res == "404: Not Found" then
 			displayErrorPopup("Failed to connect to github : vape/"..scripturl.." : "..res)
 			error(res)
@@ -1564,7 +1564,7 @@ ModuleSettings.CreateToggle({
 						end
 						rayparams.FilterDescendantsInstances = chars
 						local mouseunit = playersService.LocalPlayer:GetMouse().UnitRay
-						local ray = workspace:Raycast(mouseunit.Origin, mouseunit.Direction * 10000, rayparams)
+						local ray = game.Workspace:Raycast(mouseunit.Origin, mouseunit.Direction * 10000, rayparams)
 						if ray then
 							for i,v in pairs(entityLibrary.entityList) do
 								if ray.Instance:IsDescendantOf(v.Character) then

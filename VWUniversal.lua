@@ -10,7 +10,7 @@ local baseDirectory = shared.RiseMode and "rise/" or "vape/"
 
 local function vapeGithubRequest(scripturl)
 	if not isfile(baseDirectory..scripturl) then
-		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/"..readfile("vape/commithash.txt").."/"..scripturl, true) end)
+		local suc, res = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/vapevoidware/main/"..scripturl, true) end)
 		assert(suc, res)
 		assert(res ~= "404: Not Found", res)
 		if scripturl:find(".lua") then res = "--This watermark is used to delete the file if its cached, remove it to make the file persist after commits.\n"..res end
@@ -2406,19 +2406,19 @@ run(function()
 			table.insert(themeobjects, MoonColorCorrection)
 			MoonColorCorrection.Enabled = true
 			MoonColorCorrection.TintColor = Color3.fromRGB(189, 179, 178)
-			MoonColorCorrection.Parent = workspace
+			MoonColorCorrection.Parent = game.Workspace
 			local MoonBlur = Instance.new("BlurEffect")
 			table.insert(themeobjects, MoonBlur)
 			MoonBlur.Enabled = true
 			MoonBlur.Size = 9
-			MoonBlur.Parent = workspace
+			MoonBlur.Parent = game.Workspace
 			local MoonBloom = Instance.new("BloomEffect")
 			table.insert(themeobjects, MoonBloom)
 			MoonBloom.Enabled = true
 			MoonBloom.Intensity = 100
 			MoonBloom.Size = 56
 			MoonBloom.Threshold = 5
-			MoonBloom.Parent = workspace
+			MoonBloom.Parent = game.Workspace
 			end)
 			end
 		end,

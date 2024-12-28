@@ -39,7 +39,7 @@ local runService = cloneref(game:GetService('RunService'))
 local tweenService = cloneref(game:GetService('TweenService'))
 local debrisService = cloneref(game:GetService('Debris'))
 
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 
 local vape = shared.vape
@@ -252,8 +252,8 @@ end)
 
 run(function()
 	entitylib.Wallcheck = function(origin, position, ignoreobject)
-		local ray = workspace.Raycast(workspace, origin, (position - origin), frontlines.ShootRay)
-		return ray and ray.Instance and (ray.Instance == workspace.Terrain or ray.Instance:IsDescendantOf(workspace.workspace)) or false
+		local ray = game.Workspace.Raycast(game.Workspace, origin, (position - origin), frontlines.ShootRay)
+		return ray and ray.Instance and (ray.Instance == game.Workspace.Terrain or ray.Instance:IsDescendantOf(game.Workspace.game.Workspace)) or false
 	end
 
 	entitylib.targetCheck = function(ent)
@@ -410,7 +410,7 @@ run(function()
 								rayCheck.CollisionGroup = ent.RootPart.CollisionGroup
 								local velo = gun.fire_params.muzzle_velocity
 								local targetpos = ent.RootPart.Root_M.Spine1_M.Spine2_M.Chest_M.Neck_M.Head_M.WorldCFrame.Position
-								local calc = prediction.SolveTrajectory(origin, velo, workspace.Gravity, targetpos, Vector3.zero, workspace.Gravity, ent.HipHeight, nil, rayCheck)
+								local calc = prediction.SolveTrajectory(origin, velo, game.Workspace.Gravity, targetpos, Vector3.zero, game.Workspace.Gravity, ent.HipHeight, nil, rayCheck)
 								
 								if calc then 
 									local pos = gameCamera:WorldToViewportPoint(calc)
@@ -556,7 +556,7 @@ run(function()
 							local origin = gameCamera.CFrame.Position
 							ProjectileRaycast.FilterDescendantsInstances = {gameCamera, ent.Character}
 							ProjectileRaycast.CollisionGroup = targetPart.CollisionGroup
-							local calc = prediction.SolveTrajectory(pos, velo, workspace.Gravity, targetpos, Vector3.zero, workspace.Gravity, ent.HipHeight, nil, ProjectileRaycast)
+							local calc = prediction.SolveTrajectory(pos, velo, game.Workspace.Gravity, targetpos, Vector3.zero, game.Workspace.Gravity, ent.HipHeight, nil, ProjectileRaycast)
 							if calc then
 								dir = -CFrame.new(pos, calc).ZVector * velo
 							end
@@ -1507,7 +1507,7 @@ run(function()
 						obj.Material = Enum.Material[Material.Value]
 						obj.Color = Color3.fromHSV(Color.Hue, Color.Sat, Color.Value)
 						obj.Transparency = 1 - Color.Opacity
-						obj.Parent = workspace
+						obj.Parent = game.Workspace
 						if Fade.Enabled then 
 							local tween = tweenService:Create(obj, TweenInfo.new(Lifetime.Value), {
 								Transparency = 1

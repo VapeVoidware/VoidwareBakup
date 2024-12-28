@@ -10,7 +10,7 @@ local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local collectionService = cloneref(game:GetService('CollectionService'))
 local httpService = cloneref(game:GetService('HttpService'))
 local coreGui = cloneref(game:GetService('CoreGui'))
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 
 local vape = shared.vape

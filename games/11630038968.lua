@@ -6,7 +6,7 @@ local inputService = cloneref(game:GetService('UserInputService'))
 local replicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local runService = cloneref(game:GetService('RunService'))
 
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 local vape = shared.vape
 local entitylib = vape.Libraries.entity
@@ -63,7 +63,7 @@ run(function()
 	})
 
 	task.spawn(function()
-		local map = workspace:WaitForChild('Map', 99999)
+		local map = game.Workspace:WaitForChild('Map', 99999)
 		if map and vape.Loaded ~= nil then 
 			vape:Clean(map.DescendantAdded:Connect(function(v)
 				parsePositions(v, function(pos) 
@@ -730,7 +730,7 @@ run(function()
 										fake.Size = Vector3.new(3, 3, 3)
 										fake.Position = blockpos
 										fake:AddTag('TempBlock')
-										fake.Parent = workspace.Map
+										fake.Parent = game.Workspace.Map
 										bd.EffectsController:PlaySound(blockpos)
 										bd.Entity.LocalEntity:RemoveTool('Blocks', 1)
 	

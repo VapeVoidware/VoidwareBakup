@@ -1,7 +1,7 @@
 local run = function(func)
 	func()
 end
-local cloneref = cloneref or function(obj)
+local cloneref = function(obj)
 	return obj
 end
 local vapeEvents = setmetatable({}, {
@@ -34,7 +34,7 @@ local isnetworkowner = function(part)
 	end
 	return networkownerswitch <= tick()--]]
 end
-local gameCamera = workspace.CurrentCamera
+local gameCamera = game.Workspace.CurrentCamera
 local lplr = playersService.LocalPlayer
 local assetfunction = getcustomasset
 
@@ -528,7 +528,7 @@ run(function()
 			local hum, humrootpart, head
 			if plr then
 				hum = waitForChildOfType(char, 'Humanoid', 10)
-				humrootpart = hum and waitForChildOfType(hum, 'RootPart', workspace.StreamingEnabled and 9e9 or 10, true)
+				humrootpart = hum and waitForChildOfType(hum, 'RootPart', game.Workspace.StreamingEnabled and 9e9 or 10, true)
 				head = char:WaitForChild('Head', 10) or humrootpart
 			else
 				hum = {HipHeight = 0.5}
@@ -961,7 +961,7 @@ run(function()
 			local dblock, dpos = getPlacedBlock(pos)
 			if not dblock then return end
 
-			if (workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) > 0.4 then
+			if (game.Workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) > 0.4 then
 				local breaktype = bedwars.ItemMeta[dblock.Name].block.breakType
 				local tool = store.tools[breaktype]
 				if tool then
@@ -1134,7 +1134,7 @@ run(function()
 		pcall(function()
 			repeat task.wait() until store.matchState ~= 0 or vape.Loaded == nil
 			if vape.Loaded == nil then return end
-			mapname = workspace:WaitForChild('Map', 5):WaitForChild('Worlds', 5):GetChildren()[1].Name
+			mapname = game.Workspace:WaitForChild('Map', 5):WaitForChild('Worlds', 5):GetChildren()[1].Name
 			mapname = string.gsub(string.split(mapname, '_')[2] or mapname, '-', '') or 'Blank'
 		end)
 	end)
@@ -1318,7 +1318,7 @@ run(function()
 				if not bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then
 					local blockPlacer = bedwars.BlockPlacementController.blockPlacer
 					if store.hand.toolType == 'block' and blockPlacer then
-						if (workspace:GetServerTimeNow() - bedwars.BlockCpsController.lastPlaceTimestamp) >= ((1 / 12) * 0.5) then
+						if (game.Workspace:GetServerTimeNow() - bedwars.BlockCpsController.lastPlaceTimestamp) >= ((1 / 12) * 0.5) then
 							local mouseinfo = blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
 							if mouseinfo and mouseinfo.placementPosition == mouseinfo.placementPosition then
 								task.spawn(blockPlacer.placeBlock, blockPlacer, mouseinfo.placementPosition)
@@ -1649,7 +1649,7 @@ run(function()
 					part.CanCollide = Mode.Value == 'Collide'
 					part.Anchored = true
 					part.CanQuery = false
-					part.Parent = workspace
+					part.Parent = game.Workspace
 					AntiVoid:Clean(part)
 					AntiVoid:Clean(part.Touched:Connect(function(touchedpart)
 						if touchedpart.Parent == lplr.Character and entitylib.isAlive and debounce < tick() then
@@ -1674,7 +1674,7 @@ run(function()
 											rayCheck.FilterDescendantsInstances = {gameCamera, lplr.Character}
 											rayCheck.CollisionGroup = root.CollisionGroup
 
-											local ray = workspace:Raycast(root.Position, AntiVoidDirection, rayCheck)
+											local ray = game.Workspace:Raycast(root.Position, AntiVoidDirection, rayCheck)
 											if ray then
 												for _ = 1, 10 do
 													local dpos = roundPos(ray.Position + ray.Normal * 1.5) + Vector3.new(0, 3, 0)
@@ -1797,7 +1797,7 @@ run(function()
 						rayCheck.CollisionGroup = root.CollisionGroup
 
 						if WallCheck.Enabled then
-							local ray = workspace:Raycast(root.Position, destination, rayCheck)
+							local ray = game.Workspace:Raycast(root.Position, destination, rayCheck)
 							if ray then
 								destination = ((ray.Position + ray.Normal) - root.Position)
 							end
@@ -1808,7 +1808,7 @@ run(function()
 								local airleft = (tick() - entitylib.character.AirTime)
 								if airleft > 2 then
 									if not oldy then
-										local ray = workspace:Raycast(root.Position, Vector3.new(0, -1000, 0), rayCheck)
+										local ray = game.Workspace:Raycast(root.Position, Vector3.new(0, -1000, 0), rayCheck)
 										if ray and TP.Enabled then
 											tpToggle = false
 											oldy = root.Position.Y
@@ -1971,7 +1971,7 @@ run(function()
 			bedwars.QueryUtil:setQueryIgnored(oldroot, true)
 			clone.CFrame = oldroot.CFrame
 			lplr.Character.PrimaryPart = clone
-			lplr.Character.Parent = workspace
+			lplr.Character.Parent = game.Workspace
 			for _, v in lplr.Character:GetDescendants() do
 				if v:IsA('Weld') or v:IsA('Motor6D') then
 					if v.Part0 == oldroot then v.Part0 = clone end
@@ -1988,7 +1988,7 @@ run(function()
 		lplr.Character.Parent = game
 		oldroot.Parent = lplr.Character
 		lplr.Character.PrimaryPart = oldroot
-		lplr.Character.Parent = workspace
+		lplr.Character.Parent = game.Workspace
 		oldroot.CanCollide = true
 		for _, v in lplr.Character:GetDescendants() do
 			if v:IsA('Weld') or v:IsA('Motor6D') then
@@ -2041,7 +2041,7 @@ run(function()
 						local destination = (moveDirection * math.max(Value.Value - velo, 0) * dt)
 						rayCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
 						if WallCheck.Enabled then
-							local ray = workspace:Raycast(root.Position, destination, rayCheck)
+							local ray = game.Workspace:Raycast(root.Position, destination, rayCheck)
 							if ray then 
 								destination = ((ray.Position + ray.Normal) - root.Position) 
 							end
@@ -2092,7 +2092,7 @@ run(function()
 					proper = false
 					overlapCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
 					overlapCheck.CollisionGroup = oldroot.CollisionGroup
-					local ray = workspace:Blockcast(CFrame.new(oldroot.Position.X, clone.CFrame.p.Y, oldroot.Position.Z), Vector3.new(3, entitylib.character.HipHeight, 3), Vector3.new(0, -1000, 0), rayCheck)
+					local ray = game.Workspace:Blockcast(CFrame.new(oldroot.Position.X, clone.CFrame.p.Y, oldroot.Position.Z), Vector3.new(3, entitylib.character.HipHeight, 3), Vector3.new(0, -1000, 0), rayCheck)
 					local origcf = {clone.CFrame:GetComponents()}
 					origcf[1] = oldroot.Position.X
 					origcf[2] = ray and ray.Position.Y + entitylib.character.HipHeight or clone.CFrame.p.Y
@@ -2111,13 +2111,13 @@ run(function()
 							local cf = {clone.CFrame:GetComponents()}
 							cf[2] = oldroot.CFrame.Y
 							local newcf = CFrame.new(unpack(cf))
-							for _, v in workspace:GetPartBoundsInBox(newcf, oldroot.Size, overlapCheck) do
+							for _, v in game.Workspace:GetPartBoundsInBox(newcf, oldroot.Size, overlapCheck) do
 								if (v.Position.Y + (v.Size.Y / 2)) > (newcf.p.Y + 0.5) then
 									touched = true
 									return
 								end
 							end
-							if not workspace:Raycast(newcf.Position, Vector3.new(0, -entitylib.character.HipHeight, 0), rayCheck) then return end
+							if not game.Workspace:Raycast(newcf.Position, Vector3.new(0, -entitylib.character.HipHeight, 0), rayCheck) then return end
 							oldroot.CFrame = newcf
 							oldroot.Velocity = (clone.Velocity * Vector3.new(1, 0, 1))
 							valid = true
@@ -2354,7 +2354,7 @@ run(function()
 								if actualRoot then
 									local dir = CFrame.lookAt(selfpos, actualRoot.Position).LookVector
 									local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
-									bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
+									bedwars.SwordController.lastAttack = game.Workspace:GetServerTimeNow()
 									store.attackReach = (delta.Magnitude * 100) // 1 / 100
 									store.attackReachUpdate = tick() + 1
 									AttackRemote:FireServer({
@@ -2655,7 +2655,7 @@ run(function()
 		switchItem(item.tool, 0)
 		task.wait(0.1)
 		bedwars.ProjectileController:createLocalProjectile(bedwars.ProjectileMeta[proj], proj, proj, shootPosition.Position, '', shootPosition.LookVector * speed, {drawDurationSeconds = 1})
-		if projectileRemote:InvokeServer(item.tool, proj, proj, shootPosition.Position, pos, shootPosition.LookVector * speed, httpService:GenerateGUID(true), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045) then
+		if projectileRemote:InvokeServer(item.tool, proj, proj, shootPosition.Position, pos, shootPosition.LookVector * speed, httpService:GenerateGUID(true), {drawDurationSeconds = 1}, game.Workspace:GetServerTimeNow() - 0.045) then
 			local shoot = bedwars.ItemMeta[item.itemType].projectileSource.launchSound
 			shoot = shoot and shoot[math.random(1, #shoot)] or nil
 			if shoot then
@@ -2733,12 +2733,12 @@ run(function()
 			bedwars.placeBlock(rounded, item.itemType, false)
 		end,
 		wood_dao = function(item, pos)
-			if (lplr.Character:GetAttribute('CanDashNext') or 0) > workspace:GetServerTimeNow() or not bedwars.AbilityController:canUseAbility('dash') then
-				repeat task.wait() until (lplr.Character:GetAttribute('CanDashNext') or 0) < workspace:GetServerTimeNow() and bedwars.AbilityController:canUseAbility('dash') or not LongJump.Enabled
+			if (lplr.Character:GetAttribute('CanDashNext') or 0) > game.Workspace:GetServerTimeNow() or not bedwars.AbilityController:canUseAbility('dash') then
+				repeat task.wait() until (lplr.Character:GetAttribute('CanDashNext') or 0) < game.Workspace:GetServerTimeNow() and bedwars.AbilityController:canUseAbility('dash') or not LongJump.Enabled
 			end
 	
 			if LongJump.Enabled then
-				bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
+				bedwars.SwordController.lastAttack = game.Workspace:GetServerTimeNow()
 				switchItem(item.tool, 0.1)
 				local vec = entitylib.character.RootPart.CFrame.LookVector
 				replicatedStorage['events-@easy-games/game-core:shared/game-core-networking@getEvents.Events'].useAbility:FireServer('dash', {
@@ -2810,7 +2810,7 @@ run(function()
 						if JumpTick > tick() then
 							root.AssemblyLinearVelocity = Direction * (getSpeed() + ((JumpTick - tick()) > 1.1 and JumpSpeed or 0)) + Vector3.new(0, root.AssemblyLinearVelocity.Y, 0)
 							if entitylib.character.Humanoid.FloorMaterial == Enum.Material.Air and not start then
-								root.AssemblyLinearVelocity += Vector3.new(0, dt * (workspace.Gravity - (Extend and 6 or 23)), 0)
+								root.AssemblyLinearVelocity += Vector3.new(0, dt * (game.Workspace.Gravity - (Extend and 6 or 23)), 0)
 							else
 								root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, (Extend and 10 or 15), root.AssemblyLinearVelocity.Z)
 							end
@@ -2906,7 +2906,7 @@ run(function()
 	local OtherProjectiles
 	local rayCheck = RaycastParams.new()
 	rayCheck.FilterType = Enum.RaycastFilterType.Include
-	rayCheck.FilterDescendantsInstances = {workspace:FindFirstChild('Map')}
+	rayCheck.FilterDescendantsInstances = {game.Workspace:FindFirstChild('Map')}
 	local old
 	
 	local ProjectileAimbot = vape.Categories.Blatant:CreateModule({
@@ -2941,10 +2941,10 @@ run(function()
 						local projSpeed = (meta.launchVelocity or 100)
 						local offsetpos = pos + (projmeta.projectile == 'owl_projectile' and Vector3.zero or projmeta.fromPositionOffset)
 						local balloons = plr.Character:GetAttribute('InflatedBalloons')
-						local playerGravity = workspace.Gravity
+						local playerGravity = game.Workspace.Gravity
 	
 						if balloons and balloons > 0 then
-							playerGravity = (workspace.Gravity * (1 - ((balloons >= 4 and 1.2 or balloons >= 3 and 1 or 0.975))))
+							playerGravity = (game.Workspace.Gravity * (1 - ((balloons >= 4 and 1.2 or balloons >= 3 and 1 or 0.975))))
 						end
 	
 						if plr.Character.PrimaryPart:FindFirstChild('rbxassetid://8200754399') then
@@ -3036,7 +3036,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				repeat
-					if (workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) > 0.5 then
+					if (game.Workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) > 0.5 then
 						local ent = entitylib.EntityPosition({
 							Part = 'RootPart',
 							Range = Range.Value,
@@ -3050,10 +3050,10 @@ run(function()
 							for _, data in getProjectiles() do
 								local item, ammo, projectile, itemMeta = unpack(data)
 								if (FireDelays[item.itemType] or 0) < tick() then
-									rayCheck.FilterDescendantsInstances = {workspace.Map}
+									rayCheck.FilterDescendantsInstances = {game.Workspace.Map}
 									local meta = bedwars.ProjectileMeta[projectile]
 									local projSpeed, gravity = meta.launchVelocity, meta.gravitationalAcceleration or 196.2
-									local calc = prediction.SolveTrajectory(pos, projSpeed, gravity, ent.RootPart.Position, ent.RootPart.Velocity, workspace.Gravity, ent.HipHeight, ent.Jumping and 42.6 or nil, rayCheck)
+									local calc = prediction.SolveTrajectory(pos, projSpeed, gravity, ent.RootPart.Position, ent.RootPart.Velocity, game.Workspace.Gravity, ent.HipHeight, ent.Jumping and 42.6 or nil, rayCheck)
 									if calc then
 										targetinfo.Targets[ent] = tick() + 1
 										local switched = switchItem(item.tool)
@@ -3062,7 +3062,7 @@ run(function()
 											local dir, id = CFrame.lookAt(pos, calc).LookVector, httpService:GenerateGUID(true)
 											local shootPosition = (CFrame.new(pos, calc) * CFrame.new(Vector3.new(-bedwars.BowConstantsTable.RelX, -bedwars.BowConstantsTable.RelY, -bedwars.BowConstantsTable.RelZ))).Position
 											bedwars.ProjectileController:createLocalProjectile(meta, ammo, projectile, shootPosition, id, dir * projSpeed, {drawDurationSeconds = 1})
-											local res = projectileRemote:InvokeServer(item.tool, ammo, projectile, shootPosition, pos, dir * projSpeed, id, {drawDurationSeconds = 1, shotId = httpService:GenerateGUID(false)}, workspace:GetServerTimeNow() - 0.045)
+											local res = projectileRemote:InvokeServer(item.tool, ammo, projectile, shootPosition, pos, dir * projSpeed, id, {drawDurationSeconds = 1, shotId = httpService:GenerateGUID(false)}, game.Workspace:GetServerTimeNow() - 0.045)
 											if not res then
 												FireDelays[item.itemType] = tick()
 											else
@@ -3140,7 +3140,7 @@ run(function()
 						if WallCheck.Enabled then
 							rayCheck.FilterDescendantsInstances = {lplr.Character, gameCamera}
 							rayCheck.CollisionGroup = root.CollisionGroup
-							local ray = workspace:Raycast(root.Position, destination, rayCheck)
+							local ray = game.Workspace:Raycast(root.Position, destination, rayCheck)
 							if ray then 
 								destination = ((ray.Position + ray.Normal) - root.Position) 
 							end
@@ -4022,8 +4022,8 @@ run(function()
 					for i, v in bedwars.BatteryEffectsController.liveBatteries do
 						if (v.position - localPosition).Magnitude <= 10 then
 							local BatteryInfo = bedwars.BatteryEffectsController:getBatteryInfo(i)
-							if not BatteryInfo or BatteryInfo.activateTime >= workspace:GetServerTimeNow() or BatteryInfo.consumeTime + 0.1 >= workspace:GetServerTimeNow() then continue end
-							BatteryInfo.consumeTime = workspace:GetServerTimeNow()
+							if not BatteryInfo or BatteryInfo.activateTime >= game.Workspace:GetServerTimeNow() or BatteryInfo.consumeTime + 0.1 >= game.Workspace:GetServerTimeNow() then continue end
+							BatteryInfo.consumeTime = game.Workspace:GetServerTimeNow()
 							bedwars.Client:Get(remotes.ConsumeBattery):SendToServer({batteryId = i})
 						end
 					end
@@ -4480,7 +4480,7 @@ run(function()
 						end
 	
 						local bodyforce = Instance.new('BodyForce')
-						bodyforce.Force = Vector3.new(0, projectilemodel.PrimaryPart.AssemblyMass * workspace.Gravity, 0)
+						bodyforce.Force = Vector3.new(0, projectilemodel.PrimaryPart.AssemblyMass * game.Workspace.Gravity, 0)
 						bodyforce.Name = 'AntiGravity'
 						bodyforce.Parent = projectilemodel.PrimaryPart
 	
@@ -4579,7 +4579,7 @@ run(function()
 					bedwars.Client:Get(remotes.SpawnRaven):CallServerAsync():andThen(function(projectile)
 						if projectile then
 							local bodyforce = Instance.new('BodyForce')
-							bodyforce.Force = Vector3.new(0, projectile.PrimaryPart.AssemblyMass * workspace.Gravity, 0)
+							bodyforce.Force = Vector3.new(0, projectile.PrimaryPart.AssemblyMass * game.Workspace.Gravity, 0)
 							bodyforce.Parent = projectile.PrimaryPart
 	
 							if plr then
@@ -5270,7 +5270,7 @@ run(function()
 					part.Transparency = Transparency.Value
 					part.CanCollide = false
 					part.Anchored = true
-					part.Parent = workspace
+					part.Parent = game.Workspace
 					parts[blockpos] = part
 				end
 			end
@@ -6619,7 +6619,7 @@ run(function()
 			part.Transparency = 1
 			part.Anchored = true
 			part.CanCollide = false
-			part.Parent = workspace
+			part.Parent = game.Workspace
 			self.healthbarPart = part
 			bedwars.QueryUtil:setQueryIgnored(self.healthbarPart, true)
 	
@@ -6712,7 +6712,7 @@ run(function()
 		for _, v in tab do
 			if (v.Position - localPosition).Magnitude < Range.Value and bedwars.BlockController:isBlockBreakable({blockPosition = v.Position / 3}, lplr) then
 				if not SelfBreak.Enabled and v:GetAttribute('PlacedByUserId') == lplr.UserId then continue end
-				if (v:GetAttribute('BedShieldEndTime') or 0) > workspace:GetServerTimeNow() then continue end
+				if (v:GetAttribute('BedShieldEndTime') or 0) > game.Workspace:GetServerTimeNow() then continue end
 				if LimitItem.Enabled and not (store.hand.tool and bedwars.ItemMeta[store.hand.tool.Name].breakBlock) then continue end
 	
 				hit += 1
@@ -7157,7 +7157,7 @@ run(function()
 		Name = 'HitFix',
 		Function = function(callback)
 			debug.setconstant(bedwars.SwordController.swingSwordAtMouse, 23, callback and 'raycast' or 'Raycast')
-			debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, 4, callback and bedwars.QueryUtil or workspace)
+			debug.setupvalue(bedwars.SwordController.swingSwordAtMouse, 4, callback and bedwars.QueryUtil or game.Workspace)
 		end,
 		Tooltip = 'Changes the raycast function to the correct one'
 	})
@@ -7281,7 +7281,7 @@ run(function()
 				char.Archivable = true
 				local clone = char:Clone()
 				clone.Humanoid.Health = 100
-				clone.Parent = workspace
+				clone.Parent = game.Workspace
 				game:GetService('Debris'):AddItem(clone, 30)
 				char:Destroy()
 				task.wait(0.01)
@@ -7291,7 +7291,7 @@ run(function()
 				for _, v in clone:GetDescendants() do
 					if v:IsA('BasePart') then
 						local bodyforce = Instance.new('BodyForce')
-						bodyforce.Force = Vector3.new(0, (workspace.Gravity - 10) * v:GetMass(), 0)
+						bodyforce.Force = Vector3.new(0, (game.Workspace.Gravity - 10) * v:GetMass(), 0)
 						bodyforce.Parent = v
 						v.CanCollide = true
 						v.Velocity = partvelo[v.Name] or Vector3.zero
@@ -7321,13 +7321,13 @@ run(function()
 				part.Material = Enum.Material.Neon
 				part.CanCollide = false
 				part.CFrame = CFrame.new(startcf + newpos + ((newpos2 - newpos) * 0.5), startcf + newpos2)
-				part.Parent = workspace
+				part.Parent = game.Workspace
 				local part2 = part:Clone()
 				part2.Size = Vector3.new(3, 3, 78)
 				part2.Color = Color3.new(0.7, 0.7, 0.7)
 				part2.Transparency = 0.7
 				part2.Material = Enum.Material.SmoothPlastic
-				part2.Parent = workspace
+				part2.Parent = game.Workspace
 				game:GetService('Debris'):AddItem(part, 0.5)
 				game:GetService('Debris'):AddItem(part2, 0.5)
 				bedwars.QueryUtil:setQueryIgnored(part, true)
@@ -7338,7 +7338,7 @@ run(function()
 					soundpart.Anchored = true
 					soundpart.Size = Vector3.zero
 					soundpart.Position = startcf
-					soundpart.Parent = workspace
+					soundpart.Parent = game.Workspace
 					bedwars.QueryUtil:setQueryIgnored(soundpart, true)
 					local sound = Instance.new('Sound')
 					sound.SoundId = 'rbxassetid://6993372814'
@@ -7518,7 +7518,7 @@ run(function()
 			if callback then
 				songobj = Instance.new('Sound')
 				songobj.Volume = Volume.Value / 100
-				songobj.Parent = workspace
+				songobj.Parent = game.Workspace
 				repeat
 					if not songobj.Playing then choosesong() end
 					if beattick < tick() and SongBeats.Enabled and FOV.Enabled then
