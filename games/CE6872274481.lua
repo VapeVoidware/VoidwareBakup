@@ -461,7 +461,7 @@ local function isBlockCovered(pos)
 end
 local failedBreak = 0
 bedwars.breakBlock = function(block, anim)
-    if GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled or lplr:GetAttribute("DenyBlockBreak") then return end
+    if vape.Modules.InfiniteFly.Enabled or lplr:GetAttribute("DenyBlockBreak") then return end
 	if block.Name == "bed" and tostring(block:GetAttribute("TeamId")) == tostring(game:GetService("Players").LocalPlayer:GetAttribute("Team")) then return end
     local resolvedPos = bedwars.BlockController:getBlockPosition(block)
     if resolvedPos then
@@ -570,7 +570,7 @@ local healthbarblocktable = {
 }
 local physicsUpdate = 1 / 60
 --[[bedwars.breakBlock2 = function(pos, effects, normal, bypass, anim)
-	if GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled or lplr:GetAttribute("DenyBlockBreak") then return end
+	if vape.Modules.InfiniteFly.Enabled or lplr:GetAttribute("DenyBlockBreak") then return end
 	local block, blockpos = nil, nil
 	print("2", not bypass, not block)
 	if not bypass then block, blockpos = getLastCovered(pos, normal) end
@@ -625,7 +625,7 @@ local physicsUpdate = 1 / 60
 	end
 end--]]
 bedwars.breakBlock2 = function(block)
-	if GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled or lplr:GetAttribute("DenyBlockBreak") then return end
+	if vape.Modules.InfiniteFly.Enabled or lplr:GetAttribute("DenyBlockBreak") then return end
 	if block.Name == "bed" and tostring(block:GetAttribute("TeamId")) == tostring(game:GetService("Players").LocalPlayer:GetAttribute("Team")) then return end
 	local RayRes = bedwars.BlockController:resolveRaycastResult(block)
 	local res
@@ -2338,7 +2338,7 @@ end)
 					if not autoclicker.Enabled then break end
 					if not isNotHoveringOverGui() then continue end
 					if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then continue end
-					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
+					if vape.Modules["Lobby CheckToggle"].Api.Enabled then
 						if store.matchState == 0 then continue end
 					end
 					if store.localHand.Type == "sword" then
@@ -2466,7 +2466,7 @@ end)--]]
 					if not autoclicker.Enabled then break end
 					if not isNotHoveringOverGui() then continue end
 					--if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then continue end
-					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
+					if vape.Modules["Lobby CheckToggle"].Api.Enabled then
 						if store.matchState == 0 then continue end
 					end
 					if store.localHand.Type == "sword" then
@@ -2951,7 +2951,7 @@ local autobankballoon = false
 				coroutine.resume(FlyCoroutine)
 
 				RunLoops:BindToHeartbeat("Fly", function(delta)
-					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
+					if vape.Modules["Lobby CheckToggle"].Api.Enabled then
 						if bedwars.matchState == 0 then return end
 					end
 					if entityLibrary.isAlive then
@@ -3473,7 +3473,7 @@ end)
 					if p4.hookFunction == "PLAYER_IN_TRANSIT" then
 						store.grapple = tick() + 1.8
 						grappleHooked = true
-						GrappleExploit.ToggleButton(false)
+						GrappleExploit:Toggle(false)
 					end
 				end))
 
@@ -3489,13 +3489,13 @@ end)
 					end)
 				else
 					warningNotification("GrappleExploit", "missing grapple hook", 3)
-					GrappleExploit.ToggleButton(false)
+					GrappleExploit:Toggle(false)
 					return
 				end
 
 				local startCFrame = entityLibrary.isAlive and entityLibrary.character.HumanoidRootPart.CFrame
 				RunLoops:BindToHeartbeat("GrappleExploit", function(delta)
-					if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
+					if vape.Modules["Lobby CheckToggle"].Api.Enabled then
 						if store.matchState == 0 then return end
 					end
 					if entityLibrary.isAlive then
@@ -3511,7 +3511,7 @@ end)
 		end,
 		HoverText = "Makes you go zoom (longer GrappleExploit discovered by exelys and Cqded)",
 		ExtraText = function()
-			if GuiLibrary.ObjectsThatCanBeSaved["Text GUIAlternate TextToggle"]["Api"].Enabled then
+			if vape.Modules["Text GUIAlternate TextToggle"]["Api"].Enabled then
 				return alternatelist[table.find(GrappleExploitMode["List"], GrappleExploitMode.Value)]
 			end
 			return GrappleExploitMode.Value
@@ -3584,7 +3584,7 @@ run(function()
 				end
 				if not disabledproper then
 					warningNotification("InfiniteFly", "Wait for the last fly to finish", 3)
-					InfiniteFly.ToggleButton(false)
+					InfiniteFly:Toggle(false)
 					return
 				end
 				InfiniteFly:Clean(inputService.InputBegan:Connect(function(input1)
@@ -3619,7 +3619,7 @@ run(function()
 					cloned = lplr.Character
 					oldcloneroot = entityLibrary.character.HumanoidRootPart
 					if not lplr.Character.Parent then
-						InfiniteFly.ToggleButton(false)
+						InfiniteFly:Toggle(false)
 						return
 					end
 					lplr.Character.Parent = game.Workspace
@@ -3652,7 +3652,7 @@ run(function()
 				end
 				if not clonesuccess then
 					warningNotification("InfiniteFly", "Character missing", 3)
-					InfiniteFly.ToggleButton(false)
+					InfiniteFly:Toggle(false)
 					return
 				end
 				local goneup = false
@@ -4178,7 +4178,7 @@ run(function()
 						for i,v in pairs(killauraboxes) do
 							pcall(function()
 								local attacked = killauratarget.Enabled and plrs[i] or nil
-								v.Adornee = attacked and ((not killauratargethighlight.Enabled) and attacked.RootPart or (not GuiLibrary.ObjectsThatCanBeSaved.ChamsOptionsButton.Api.Enabled) and attacked.Character or nil)
+								v.Adornee = attacked and ((not killauratargethighlight.Enabled) and attacked.RootPart or (not vape.Modules.Chams.Enabled) and attacked.Character or nil)
 							end)
 						end	
 					until (not Killaura.Enabled)
@@ -4792,7 +4792,7 @@ run(function()
 					LongJump:Clean(runservice.Heartbeat:Connect(function(dt)
 						if entityLibrary.isAlive then
 							if entityLibrary.character.Humanoid.Health <= 0 then
-								LongJump.ToggleButton(false)
+								LongJump:Toggle(false)
 								return
 							end
 							if not LongJumpOrigin then
@@ -4929,7 +4929,7 @@ run(function()
 		Function = function(callback)
 			if callback then
 				Phase:Clean(runservice.Heartbeat:Connect(function()
-					if entityLibrary.isAlive and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero and (not GuiLibrary.ObjectsThatCanBeSaved.SpiderOptionsButton.Api.Enabled or holdingshift) then
+					if entityLibrary.isAlive and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero and (not vape.Modules.Spider.Enabled or holdingshift) then
 						if PhaseDelay <= tick() then
 							raycastparameters.FilterDescendantsInstances = {store.blocks, collectionService:GetTagged("spawn-cage")}
 							local PhaseRayCheck = game.Workspace:Raycast(entityLibrary.character.Head.CFrame.p, entityLibrary.character.Humanoid.MoveDirection * 1.15, raycastparameters)
@@ -5248,69 +5248,6 @@ run(function()
 end)
 
 local antivoidvelo
---[[run(function()
-    local Speed = {Enabled = false}
-	local SpeedMode = {Value = "CFrame"}
-	local SpeedValue = {Value = 1}
-    local SpeedDamageBoost = {Enabled = false}
-    local raycastparameters = RaycastParams.new()
-    local damagetick = tick()
-
-    Speed = vape.Categories.Utility:CreateModule({
-		Name = "Speed",
-		Function = function(callback)
-			if callback then
-				table.insert(Speed.Connections, vapeEvents.EntityDamageEvent.Event:Connect(function(damageTable)
-					if damageTable.entityInstance == lplr.Character and (damageTable.damageType ~= 0 or damageTable.extra and damageTable.extra.chargeRatio ~= nil) and (not (damageTable.knockbackMultiplier and damageTable.knockbackMultiplier.disabled or damageTable.knockbackMultiplier and damageTable.knockbackMultiplier.horizontal == 0)) and SpeedDamageBoost.Enabled then 
-						damagetick = tick() + 0.4
-					end
-				end))
-				RunLoops:BindToHeartbeat("Speed", function(delta)
-					if entityLibrary.isAlive then
-						if GuiLibrary.ObjectsThatCanBeSaved["FlyOptionsButton"] and GuiLibrary.ObjectsThatCanBeSaved["FlyOptionsButton"].Api and GuiLibrary.ObjectsThatCanBeSaved["FlyOptionsButton"].Api.Enabled or GuiLibrary.ObjectsThatCanBeSaved["InfiniteFlyOptionsButton"] and GuiLibrary.ObjectsThatCanBeSaved["InfiniteFlyOptionsButton"].Api and GuiLibrary.ObjectsThatCanBeSaved["InfiniteFlyOptionsButton"].Api.Enabled or GuiLibrary.ObjectsThatCanBeSaved["LongJumpOptionsButton"] and GuiLibrary.ObjectsThatCanBeSaved["LongJumpOptionsButton"].Api and GuiLibrary.ObjectsThatCanBeSaved["LongJumpOptionsButton"].Api.Enabled then return end
-						local speedValue = ((damagetick > tick() and SpeedValue.Value * 2.25 or SpeedValue.Value) * getSpeed(true))
-						local speedVelocity = entityLibrary.character.Humanoid.MoveDirection * (SpeedMode.Value == "Normal" and speedValue or (20 * getSpeed()))
-						entityLibrary.character.HumanoidRootPart.Velocity = antivoidvelo or Vector3.new(speedVelocity.X, entityLibrary.character.HumanoidRootPart.Velocity.Y, speedVelocity.Z)
-						if SpeedMode.Value ~= "Normal" then 
-							if SpeedMode.Value == "Heatseeker" then 
-								speedValue = tick() % 1 < 0.6 and 5 or (20 * getSpeed(true)) / 0.4
-							end
-							local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * (speedValue - 20) * delta
-							raycastparameters.FilterDescendantsInstances = {lplr.Character}
-							local ray = game.Workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
-							if ray then speedCFrame = (ray.Position - entityLibrary.character.HumanoidRootPart.Position) end
-							entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + speedCFrame
-						end
-					end
-				end)
-			else
-				RunLoops:UnbindFromHeartbeat("Speed")
-			end
-		end,
-		HoverText = "Increases your movement speed",
-		ExtraText = function() return SpeedMode.Value end
-	})
-	Speed.Restart = function()
-		if Speed.Enabled then Speed.ToggleButton(false); Speed.ToggleButton(false) end
-	end
-	SpeedMode = Speed:CreateDropdown({
-		Name = "Mode",
-		Function = Speed.Restart,
-		List = {"CFrame", "Normal", "Heatseeker"}
-	})
-	SpeedValue = Speed:CreateSlider({
-		Name = "Speed",
-		Function = function() end,
-		Min = 1,
-		Max = 23,
-		Default = 23
-	})
-    SpeedDamageBoost = Speed:CreateToggle({
-		Name = "Damage Boost",
-		Function = Speed.Restart,
-		Default = true
-	})
-end)--]]
 run(function()
 	local Speed = {Enabled = false}
 	local SpeedMode = {Value = "CFrame"}
@@ -5340,8 +5277,8 @@ run(function()
 				end))
 				Speed:Clean(runservice.Heartbeat:Connect(function(delta)
 					if entityLibrary.isAlive then
-						if not (isnetworkowner(entityLibrary.character.HumanoidRootPart) and entityLibrary.character.Humanoid:GetState() ~= Enum.HumanoidStateType.Climbing and (not spiderActive) and (not GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled) and (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled)) then return end
-						if GuiLibrary.ObjectsThatCanBeSaved.GrappleExploitOptionsButton and GuiLibrary.ObjectsThatCanBeSaved.GrappleExploitOptionsButton.Api.Enabled then return end
+						if not (isnetworkowner(entityLibrary.character.HumanoidRootPart) and entityLibrary.character.Humanoid:GetState() ~= Enum.HumanoidStateType.Climbing and (not spiderActive) and (not vape.Modules.InfiniteFly.Enabled) and (not vape.Modules.Fly.Enabled)) then return end
+						if vape.Modules.GrappleExploitOptionsButton and vape.Modules.GrappleExploit.Enabled then return end
 						if LongJump.Enabled then return end
 						if SpeedAnimation.Enabled then
 							for i, v in pairs(entityLibrary.character.Humanoid:GetPlayingAnimationTracks()) do
@@ -5384,7 +5321,7 @@ run(function()
 		end
 	})
 	Speed.Restart = function()
-		if Speed.Enabled then Speed.ToggleButton(false); Speed.ToggleButton(false) end
+		if Speed.Enabled then Speed:Toggle(false); Speed:Toggle(false) end
 	end
 	SpeedDamageBoost = Speed:CreateToggle({
 		Name = "Damage Boost",
@@ -5467,7 +5404,7 @@ run(function()
 					end
 				end))
 				Spider:Clean(runservice.Heartbeat:Connect(function()
-					if entityLibrary.isAlive and (GuiLibrary.ObjectsThatCanBeSaved.PhaseOptionsButton.Api.Enabled == false or holdingshift == false) then
+					if entityLibrary.isAlive and (vape.Modules.Phase.Enabled == false or holdingshift == false) then
 						if SpiderMode.Value == "Normal" then
 							local vec = entityLibrary.character.Humanoid.MoveDirection * 2
 							local newray = getPlacedBlock(entityLibrary.character.HumanoidRootPart.Position + (vec + Vector3.new(0, 0.1, 0)), true)
@@ -5821,14 +5758,14 @@ run(function()
 		TempText = 'item or part of item',
 		AddFunction = function()
 			if ChestESP.Enabled then 
-				ChestESP.ToggleButton(false)
-				ChestESP.ToggleButton(false)
+				ChestESP:Toggle(false)
+				ChestESP:Toggle(false)
 			end
 		end,
 		RemoveFunction = function()
 			if ChestESP.Enabled then 
-				ChestESP.ToggleButton(false)
-				ChestESP.ToggleButton(false)
+				ChestESP:Toggle(false)
+				ChestESP:Toggle(false)
 			end
 		end
 	})
@@ -5836,8 +5773,8 @@ run(function()
 		Name = 'Background',
 		Function = function()
 			if ChestESP.Enabled then 
-				ChestESP.ToggleButton(false)
-				ChestESP.ToggleButton(false)
+				ChestESP:Toggle(false)
+				ChestESP:Toggle(false)
 			end
 		end,
 		Default = true
@@ -5910,7 +5847,7 @@ run(function()
 	})
 	removetextures = FPSBoost:CreateToggle({
 		Name = "Remove Textures",
-		Function = function(callback) if FPSBoost.Enabled then FPSBoost.ToggleButton(false) FPSBoost.ToggleButton(false) end end
+		Function = function(callback) if FPSBoost.Enabled then FPSBoost:Toggle(false) FPSBoost:Toggle(false) end end
 	})
 end)
 
@@ -6074,7 +6011,7 @@ run(function()
 					transformed = true
 					themefunctions[GameThemeMode.Value]()
 				else
-					GameTheme.ToggleButton(false)
+					GameTheme:Toggle(false)
 				end
 			else
 				warningNotification("GameTheme", "Disabled Next Game", 10)
@@ -6216,8 +6153,8 @@ run(function()
 		Name = "Mode",
 		Function = function()
 			if KillEffect.Enabled then
-				KillEffect.ToggleButton(false)
-				KillEffect.ToggleButton(false)
+				KillEffect:Toggle(false)
+				KillEffect:Toggle(false)
 			end
 		end,
 		List = modes
@@ -6226,8 +6163,8 @@ run(function()
 		Name = "Bedwars",
 		Function = function()
 			if KillEffect.Enabled then
-				KillEffect.ToggleButton(false)
-				KillEffect.ToggleButton(false)
+				KillEffect:Toggle(false)
+				KillEffect:Toggle(false)
 			end
 		end,
 		List = KillEffectName
@@ -6882,7 +6819,7 @@ run(function()
 		local song = isfile(args[1]) and getcustomasset(args[1]) or tonumber(args[1]) and "rbxassetid://"..args[1]
 		if not song then
 			warningNotification("SongBeats", "missing music file "..args[1], 5)
-			SongBeats.ToggleButton(false)
+			SongBeats:Toggle(false)
 			return
 		end
 		local bpm = 1 / (args[2] / 60)
@@ -6909,7 +6846,7 @@ run(function()
 				task.spawn(function()
 					if #SongBeatsList.ObjectList <= 0 then
 						warningNotification("SongBeats", "no songs", 5)
-						SongBeats.ToggleButton(false)
+						SongBeats:Toggle(false)
 						return
 					end
 					local lastChosen
@@ -7521,7 +7458,7 @@ run(function()
         end,
         HoverText = "Auto buys diamond upgrades"
     })
-    AutoBuyDiamond.Restart = function() if AutoBuyDiamond.Enabled then AutoBuyDiamond.ToggleButton(false); AutoBuyDiamond.ToggleButton(false) end end
+    AutoBuyDiamond.Restart = function() if AutoBuyDiamond.Enabled then AutoBuyDiamond:Toggle(false); AutoBuyDiamond:Toggle(false) end end
     AutoBuyDiamondRange = AutoBuyDiamond:CreateSlider({
         Name = "Range",
         Function = function() end,
@@ -7617,7 +7554,7 @@ run(function()
 		end,
 		HoverText = "Automatically heals for you when health or shield is under threshold."
 	})
-	AutoConsume.Restart = function() if AutoConsume.Enabled then AutoConsume.ToggleButton(false); AutoConsume.ToggleButton(false) end end
+	AutoConsume.Restart = function() if AutoConsume.Enabled then AutoConsume:Toggle(false); AutoConsume:Toggle(false) end end
 	AutoConsumeStar = AutoConsume:CreateToggle({
 		Name = "Auto Consume Stars",
 		Function = AutoConsumeStar.Restart,
@@ -7758,7 +7695,7 @@ end)
 				AutoHotbarSort()
 				if AutoHotbarMode.Value == "On Key" then
 					if AutoHotbar.Enabled then
-						AutoHotbar.ToggleButton(false)
+						AutoHotbar:Toggle(false)
 					end
 				else
 					table.insert(AutoHotbar.Connections, vapeEvents.InventoryAmountChanged.Event:Connect(function()
@@ -7775,8 +7712,8 @@ end)
 		List = {"On Key", "Toggle"},
 		Function = function(val)
 			if AutoHotbar.Enabled then
-				AutoHotbar.ToggleButton(false)
-				AutoHotbar.ToggleButton(false)
+				AutoHotbar:Toggle(false)
+				AutoHotbar:Toggle(false)
 			end
 		end
 	})
@@ -8746,7 +8683,7 @@ run(function()
 				pcall(function()
 					if RavenTPMode.Value ~= "Toggle" then
 						Raven()
-						RavenTP.ToggleButton(true)
+						RavenTP:Toggle(true)
 					else
 						repeat Raven() task.wait() until not RavenTP.Enabled
 					end
@@ -8760,8 +8697,8 @@ run(function()
 		List = {"On Key", "Toggle"},
 		Function = function(val)
 			if RavenTP.Enabled then
-				RavenTP.ToggleButton(false)
-				RavenTP.ToggleButton(false)
+				RavenTP:Toggle(false)
+				RavenTP:Toggle(false)
 			end
 		end
 	})
@@ -8896,7 +8833,7 @@ run(function()
 					end
 					AntiVoidConnection = AntiVoidPart.Touched:Connect(function(touchedpart)
 						if touchedpart.Parent == lplr.Character and entityLibrary.isAlive then
-							if (not antivoiding) and (not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) and entityLibrary.character.Humanoid.Health > 0 and AntiVoidMode.Value ~= "Collide" then
+							if (not antivoiding) and (not vape.Modules.Fly.Enabled) and entityLibrary.character.Humanoid.Health > 0 and AntiVoidMode.Value ~= "Collide" then
 								if AntiVoidMode.Value == "Velocity" then
 									entityLibrary.character.HumanoidRootPart.Velocity = Vector3.new(entityLibrary.character.HumanoidRootPart.Velocity.X, 100, entityLibrary.character.HumanoidRootPart.Velocity.Z)
 								else
@@ -8932,7 +8869,7 @@ run(function()
 					repeat
 						if entityLibrary.isAlive and AntiVoidMoveMode.Value == "Normal" then
 							local ray = game.Workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(0, -1000, 0), store.blockRaycast)
-							if ray or GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled or GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled then
+							if ray or vape.Modules.Fly.Enabled or vape.Modules.InfiniteFly.Enabled then
 								AntiVoidPart.Position = entityLibrary.character.HumanoidRootPart.Position - Vector3.new(0, 21, 0)
 							end
 						end
@@ -8948,7 +8885,7 @@ run(function()
 		end,
 		HoverText = "Gives you a chance to get on land (Bouncing Twice, abusing, or bad luck will lead to lagbacks)"
 	})
-	AntiVoid.Restart = function() if AntiVoid.Enbaled then AntiVoid.ToggleButton(false); AntiVoid.ToggleButton(false) end end
+	AntiVoid.Restart = function() if AntiVoid.Enbaled then AntiVoid:Toggle(false); AntiVoid:Toggle(false) end end
 	AntiVoidMoveMode = AntiVoid:CreateDropdown({
 		Name = "Position Mode",
 		Function = function(val)
@@ -9113,7 +9050,7 @@ run(function()
 							break
 						end
 					end
-					BedProtector.ToggleButton(false)
+					BedProtector:Toggle(false)
 				end)
 			end
 		end,
@@ -9164,7 +9101,7 @@ run(function()
 				end))
 				task.spawn(function()
 					repeat
-						if (not nukernofly.Enabled or not GuiLibrary.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) then
+						if (not nukernofly.Enabled or not vape.Modules.Fly.Enabled) then
 							local broke = not entityLibrary.isAlive
 							local tool = (not nukerlegit.Enabled) and {Name = "wood_axe"} or store.localHand.tool
 							if nukerbeds.Enabled then
@@ -9460,7 +9397,7 @@ run(function()
 							end
 						until #positions.blocks == 0 or (not Schematica.Enabled)
 						if Schematica.Enabled then
-							Schematica.ToggleButton(false)
+							Schematica:Toggle(false)
 							warningNotification("Schematica", "Finished Placing Blocks", 4)
 						end
 					end)
