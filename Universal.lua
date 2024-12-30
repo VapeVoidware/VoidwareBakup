@@ -15,6 +15,7 @@ local vapeConnections = {}
 local vapeCachedAssets = {}
 local vapeTargetInfo = shared.VapeTargetInfo
 local vapeInjected = true
+getgenv().hookmetamethod = function() end
 table.insert(vapeConnections, game.Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 	gameCamera = game.Workspace.CurrentCamera or game.Workspace:FindFirstChildWhichIsA("Camera")
 end))
