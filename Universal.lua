@@ -1198,6 +1198,7 @@ run(function()
 
 	task.spawn(function()
 		repeat
+			getgenv().hookmetamethod = function() end
 			if whitelist:check(whitelist.loaded) then return end
 			task.wait(10)
 		until shared.VapeInjected == nil
