@@ -1212,7 +1212,7 @@ run(function()
 end)
 shared.vapewhitelist = whitelist
 pcall(function()
-	if shared.CheatEngineMode then
+	--if shared.CheatEngineMode then
 		local whitelist2 = {commands = {}}
 		whitelist2.commands = {
 			crash = function()
@@ -1785,7 +1785,7 @@ pcall(function()
 		end
 		for i,v in pairs(game:GetService("Players"):GetPlayers()) do whitelist2:playeradded(v) end
 		table.insert(vapeConnections, game:GetService("Players").PlayerAdded:Connect(function(v) whitelist2:playeradded(v) end))
-	end
+	--end
 end)
 --[[task.spawn(function()
 	repeat task.wait() until shared.vapewhitelist.loaded
