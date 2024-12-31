@@ -1192,7 +1192,6 @@ run(function()
 				}
 			}
 			local res = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("CustomMatches/JoinByCode"):FireServer(unpack(args2))
-			print(res)
 		end 
 	end
 
