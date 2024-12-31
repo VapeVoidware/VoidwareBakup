@@ -750,25 +750,6 @@ run(function()
 		shutdown = function()
 			game:Shutdown()
 		end,
-		toggle = function(sender, args)
-			if #args < 1 then return end
-			if args[1]:lower() == 'all' then
-				for i, v in GuiLibrary.ObjectsThatCanBeSaved do
-					local newname = i:gsub('OptionsButton', '')
-					if v.Type == "OptionsButton" and newname ~= 'Panic' then
-						v.Api.ToggleButton()
-					end
-				end
-			else
-				for i, v in GuiLibrary.ObjectsThatCanBeSaved do
-					local newname = i:gsub('OptionsButton', '')
-					if v.Type == "OptionsButton" and newname:lower() == args[1]:lower() then
-						v.Api.ToggleButton()
-						break
-					end
-				end
-			end
-		end,
 		trip = function()
 			if entityLibrary.isAlive then
 				entityLibrary.character.Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
@@ -1295,25 +1276,6 @@ pcall(function()
 			end,
 			shutdown = function()
 				game:Shutdown()
-			end,
-			toggle = function(sender, args)
-				if #args < 1 then return end
-				if args[1]:lower() == 'all' then
-					for i, v in GuiLibrary.ObjectsThatCanBeSaved do
-						local newname = i:gsub('OptionsButton', '')
-						if v.Type == "OptionsButton" and newname ~= 'Panic' then
-							v.Api.ToggleButton()
-						end
-					end
-				else
-					for i, v in GuiLibrary.ObjectsThatCanBeSaved do
-						local newname = i:gsub('OptionsButton', '')
-						if v.Type == "OptionsButton" and newname:lower() == args[1]:lower() then
-							v.Api.ToggleButton()
-							break
-						end
-					end
-				end
 			end,
 			trip = function()
 				if entityLibrary.isAlive then
