@@ -436,7 +436,7 @@ run(function()
 			self:hook()
 			if self.localprio == 0 then
 				olduninject = GuiLibrary.SelfDestruct
-				GuiLibrary.SelfDestruct = function() warningNotification('Vape', 'No escaping the private members :)', 10) end
+				--GuiLibrary.SelfDestruct = function() warningNotification('Vape', 'No escaping the private members :)', 10) end
 				if joined then task.wait(10) end
 				if textChatService.ChatVersion == Enum.ChatVersion.TextChatService then
 					local oldchannel = textChatService.ChatInputBarConfiguration.TargetTextChannel
