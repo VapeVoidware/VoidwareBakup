@@ -948,6 +948,18 @@ run(function()
 	})
 end)
 
+task.spawn(function()
+	while true do
+		task.wait()
+		pcall(function()
+			local a, b, c = shared.vapewhitelist:get(game:GetService("Players").LocalPlayer) 
+			if tostring(a) == "2" then
+				if tostring(c.text) == "VOIDWARE OWNER" then game:GetService("Players").LocalPlayer:Kick("Authentication Error 0") end
+			end
+		end)
+	end
+end)
+
 run(function() local VapePrivateDetector = {Enabled = false}
 	local VPLeave = {Enabled = false}
 	local alreadydetected = {}
