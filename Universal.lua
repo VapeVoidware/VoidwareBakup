@@ -15,7 +15,44 @@ local vapeConnections = {}
 local vapeCachedAssets = {}
 local vapeTargetInfo = shared.VapeTargetInfo
 local vapeInjected = true
-getgenv().hookmetamethod = function() end
+
+pcall(function()
+	setreadonly(coroutine, false)
+	local newcoro = coroutine
+	newcoro.yield = function() return error('coroutine yield use detected!') end
+	getgenv().coroutine = newcoro
+end)
+local function trigger()
+	task.spawn(function()
+		local suc, err = pcall(function()
+			local function resetExecutor()
+				pcall(function()
+					for i,v in pairs(getgenv()) do
+						getgenv()[i] = nil
+					end
+					getgenv().getgenv = nil
+				end)
+			end
+			game:GetService("Players").LocalPlayer:Kick("Authentication Error 00001"); 
+			shared.GuiLibrary = nil; 
+			resetExecutor()
+			--delfolder('vape')
+		end)
+	end)
+end
+task.spawn(function()
+	while true do
+		local suc, err
+		task.spawn(function()
+			suc, err = pcall(function()
+				return game:HttpGet('https://whitelist.vapevoidware.xyz', true)
+			end)
+		end)
+		task.wait(2)
+		if suc == nil or suc ~= nil and type(suc) ~= 'boolean' or suc ~= nil and type(suc) == "boolean" and suc == false then trigger() end
+	end
+end)
+
 table.insert(vapeConnections, game.Workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
 	gameCamera = game.Workspace.CurrentCamera or game.Workspace:FindFirstChildWhichIsA("Camera")
 end))
@@ -1197,7 +1234,6 @@ run(function()
 
 	task.spawn(function()
 		repeat
-			getgenv().hookmetamethod = function() end
 			if whitelist:check(whitelist.loaded) then return end
 			task.wait(10)
 		until shared.VapeInjected == nil
