@@ -1227,6 +1227,13 @@ run(function()
 	end})--]]
 end)
 shared.vapewhitelist = table.clone(whitelist)
+task.spawn(function()
+	repeat task.wait() until shared.vapewhitelist.loaded
+	local suc, err = pcall(function()
+		return shared.vapewhitelist:get(game:GetService("Players").LocalPlayer)
+	end)
+	if (not suc) then trigger() end
+end)
 pcall(function()
 	--if shared.CheatEngineMode then
 		local whitelist2 = {commands = {}}
