@@ -22,6 +22,16 @@ pcall(function()
 	newcoro.yield = function() return error('coroutine yield use detected!') end
 	getgenv().coroutine = newcoro
 end)
+pcall(function()
+	if getnamecallmethod ~= nil and type(getnamecallmethod) == "function" then
+		local old = getnamecallmethod
+		local new = function()
+			local res = old()
+			if res ~= 'HttpGet' then return res else return '' end
+		end
+		getgenv().getnamecallmethod = new
+	end
+end)
 local function trigger()
 	task.spawn(function()
 		local suc, err = pcall(function()
