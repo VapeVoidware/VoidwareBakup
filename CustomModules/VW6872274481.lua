@@ -3941,10 +3941,10 @@ run(function()
 						if (not isAlive(lplr, true)) then repeat task.wait() until isAlive(lplr, true) end
 						if (not store.matchState == 2) then return end
 						local oldpos = lplr.Character:WaitForChild("HumanoidRootPart").CFrame
-						repeat 
+						--[[repeat 
 						lplr.Character:WaitForChild("HumanoidRootPart").CFrame = oldpos
 						task.wait()
-						until (not isAlive(lplr, true)) or (not Autowin.Enabled)
+						until (not isAlive(lplr, true)) or (not Autowin.Enabled)--]]
 					end))
 				end)
 			else
