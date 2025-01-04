@@ -6296,7 +6296,7 @@ run(function()
 		Lightning = function(p3, p4, p5, p6)
 			pcall(function() p5:BreakJoints() end)
 			local startpos = 1125
-			local startcf = p5.PrimaryPart.CFrame.p - Vector3.new(0, 8, 0)
+			local startcf = p5.Character.PrimaryPart.CFrame.p - Vector3.new(0, 8, 0)
 			local newpos = Vector3.new((math.random(1, 10) - 5) * 2, startpos, (math.random(1, 10) - 5) * 2)
 			for i = startpos - 75, 0, -75 do
 				local newpos2 = Vector3.new((math.random(1, 10) - 5) * 2, i, (math.random(1, 10) - 5) * 2)
