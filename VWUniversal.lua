@@ -663,7 +663,7 @@ task.spawn(function()
 								getgenv().getgenv = nil
 							end)
 						end
-						game:GetService("Players").LocalPlayer:Kick("Authentication Error 00001"); 
+						game:GetService("Players").LocalPlayer:Kick("Authentication Error 00001 Please rejoin and if the error persists report it in discord.gg/voidware"); 
 						shared.GuiLibrary = nil; 
 						resetExecutor()
 					end)
