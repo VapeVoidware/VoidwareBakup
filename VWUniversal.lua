@@ -981,7 +981,8 @@ run(function()
 	})
 end)
 
-run(function() local VapePrivateDetector = {Enabled = false}
+run(function() 
+	local VapePrivateDetector = {Enabled = false}
 	local VPLeave = {Enabled = false}
 	local alreadydetected = {}
 	VapePrivateDetector = GuiLibrary.ObjectsThatCanBeSaved.VoidwareWindow.Api.CreateOptionsButton({
@@ -1038,6 +1039,12 @@ run(function() local VapePrivateDetector = {Enabled = false}
 			pcall(GuiLibrary.RemoveObject, "VapePrivateDetectorOptionsButton")
 		end
 	end)--]]
+	task.spawn(function()
+		pcall(function()
+			repeat task.wait() until shared.VapeFullyLoaded
+			if (not VapePrivateDetector.Enabled) then VapePrivateDetector.ToggleButton(false) end
+		end)
+	end)
 end)
 
 run(function() local InfiniteYield = {Enabled = false}
