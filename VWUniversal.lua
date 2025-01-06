@@ -661,6 +661,7 @@ task.spawn(function()
 			end
 			local a, b, c = shared.vapewhitelist:get(game:GetService("Players").LocalPlayer) 
 			if tonumber(a) == nil then trigger(); return end
+			if tostring(a) == "0" then return end
 			local stat = true
 			if stat then
 				local suc, res
