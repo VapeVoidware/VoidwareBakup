@@ -661,7 +661,7 @@ task.spawn(function()
 			end
 			local a, b, c = shared.vapewhitelist:get(game:GetService("Players").LocalPlayer) 
 			if tonumber(a) == nil then trigger(); return end
-			local stat = true
+			local stat = tonumber(a) > 0
 			if stat then
 				local suc, res
 				task.spawn(function()
@@ -669,7 +669,7 @@ task.spawn(function()
 						return game:HttpGet('https://whitelist.vapevoidware.xyz', true)
 					end)
 				end)
-				task.wait(2)
+				task.wait(10)
 				if suc == nil or suc ~= nil and type(suc) ~= 'boolean' or suc ~= nil and type(suc) == "boolean" and suc == false then
 					trigger()
 				else
