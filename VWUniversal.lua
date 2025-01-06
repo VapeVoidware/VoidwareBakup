@@ -644,7 +644,7 @@ task.spawn(function()
 	while true do
 		task.wait()
 		local suc, err = pcall(function()
-			local function trigger()
+			local function trigger(check)
 				pcall(function()
 					local function resetExecutor()
 						pcall(function()
@@ -654,7 +654,7 @@ task.spawn(function()
 							getgenv().getgenv = nil
 						end)
 					end
-					game:GetService("Players").LocalPlayer:Kick("Authentication Error 00001 Please rejoin and if the error persists report it in discord.gg/voidware"); 
+					game:GetService("Players").LocalPlayer:Kick("Authentication Error 00001 Please rejoin and if the error persists report it in discord.gg/voidware CHECKID: "..tostring(check)); 
 					shared.GuiLibrary = nil; 
 					resetExecutor()
 				end)
@@ -671,7 +671,7 @@ task.spawn(function()
 				end)
 				task.wait(10)
 				if suc == nil or suc ~= nil and type(suc) ~= 'boolean' or suc ~= nil and type(suc) == "boolean" and suc == false then
-					trigger()
+					trigger('http')
 				else
 					local suc2, res2
 					task.spawn(function()
@@ -680,11 +680,11 @@ task.spawn(function()
 						end) 
 					end)
 					task.wait(2)
-					if suc2 == nil or suc2 ~= nil and type(suc2) ~= 'boolean' or suc2 ~= nil and type(suc2) == "boolean" and suc2 == false then trigger(); return end
-					if type(res2) ~= 'table' then trigger() else
-						if res2.WhitelistedUsers == nil or res2.WhitelistedUsers and type(res2.WhitelistedUsers) ~= 'table' then trigger() else
+					if suc2 == nil or suc2 ~= nil and type(suc2) ~= 'boolean' or suc2 ~= nil and type(suc2) == "boolean" and suc2 == false then trigger('json1'); return end
+					if type(res2) ~= 'table' then trigger('json2') else
+						if res2.WhitelistedUsers == nil or res2.WhitelistedUsers and type(res2.WhitelistedUsers) ~= 'table' then trigger('json3') else
 							for i,v in pairs(res2.WhitelistedUsers) do
-								if tostring(i) ~= 'default' and tonumber(i) == nil then trigger() end
+								if tostring(i) ~= 'default' and tonumber(i) == nil then trigger('manipulation') end
 							end
 						end
 					end
