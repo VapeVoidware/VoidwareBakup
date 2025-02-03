@@ -1794,7 +1794,7 @@ pcall(function()
 				local a = msg:split("")
 				if a[1] == ";" then
 					local b = msg:split(" ")
-					local cmdName, target = string:sub(b[1], 2), b[2]
+					local cmdName, target = string.sub(b[1], 2), b[2]
 					if not isValidTarget(target) then return end
 					local args = {}
 					for i = 3, #d do table.insert(args, d[i]) end
