@@ -86,6 +86,158 @@ local function checkDebug()
         end
     end
 end
+task.spawn(function()
+    pcall(function()
+        local Services = setmetatable({}, {
+            __index = function(self, key)
+                local suc, service = pcall(game.GetService, game, key)
+                if suc and service then
+                    self[key] = service
+                    return service
+                else
+                    warn(`[Services] Warning: "{key}" is not a valid Roblox service.`)
+                    return nil
+                end
+            end
+        })
+
+        local Players = Services.Players
+        local TextChatService = Services.TextChatService
+        local ChatService = Services.ChatService
+        repeat
+            task.wait()
+        until game:IsLoaded() and Players.LocalPlayer ~= nil
+        local chatVersion = TextChatService and TextChatService.ChatVersion or Enum.ChatVersion.LegacyChatService
+        local TagRegister = shared.TagRegister or {}
+        if shared.FORCE_LOAD_CHAT_TAG or not shared.CheatEngineMode then
+            local function richTextColor(color)
+                return string.format("rgb(%d,%d,%d)", math.floor(color.R * 255 + 0.5), math.floor(color.G * 255 + 0.5), math.floor(color.B * 255 + 0.5))
+            end
+            
+            local function tableValues(tbl)
+                local values = {}
+                for key, _ in pairs(tbl) do
+                    table.insert(values, key)
+                end
+                return values
+            end
+            
+            local ChatTagType = {
+                VIP = true,
+                TRANSLATOR = true,
+                DEV = true,
+                ["AC MOD"] = true,
+                ["LEAD AC MOD"] = true,
+                BUILDER = true,
+                ["EMOTE ARTIST"] = true,
+                FAMOUS = true,
+                ["COMMUNITY MANAGER"] = true,
+                PATRON = true,
+            }
+            
+            local ChatTagMeta = {
+                VIP = {displayOrder = 1},
+                TRANSLATOR = {displayOrder = 2},
+                DEV = {displayOrder = 3},
+                ["AC MOD"] = {displayOrder = 4},
+                ["LEAD AC MOD"] = {displayOrder = 5},
+                BUILDER = {displayOrder = 6},
+                ["EMOTE ARTIST"] = {displayOrder = 7},
+                FAMOUS = {displayOrder = 8},
+                ["COMMUNITY MANAGER"] = {displayOrder = 9},
+                PATRON = {displayOrder = 10},
+            }
+            
+            local function getGamePrefixTags(plr)
+                local tagsFolder = plr:FindFirstChild("Tags")
+                if not tagsFolder then
+                    return ""
+                end
+                local types = tableValues(ChatTagType)
+                local function sortFunc(a, b)
+                    return (ChatTagMeta[a] and ChatTagMeta[a].displayOrder or 999) < (ChatTagMeta[b] and ChatTagMeta[b].displayOrder or 999)
+                end
+                table.sort(types, sortFunc)
+                local result = ""
+                for _, typeName in ipairs(types) do
+                    local bestTag = nil
+                    for _, tag in ipairs(tagsFolder:GetChildren()) do
+                        if tag.Name == tostring(typeName) and tag:IsA("StringValue") then
+                            local isBest = bestTag == nil
+                            if not isBest then
+                                local bestPri = bestTag:GetAttribute("TagPriority") or 0
+                                local thisPri = tag:GetAttribute("TagPriority") or 0
+                                isBest = bestPri < thisPri
+                            end
+                            if isBest then
+                                bestTag = tag
+                            end
+                        end
+                    end
+                    if bestTag then
+                        result = result .. bestTag.Value .. " "
+                    end
+                end
+                return result
+            end
+            
+            --if chatVersion == Enum.ChatVersion.TextChatService then
+                TextChatService.OnIncomingMessage = function(data)
+                    TagRegister = shared.TagRegister or {}
+                    local properties = Instance.new("TextChatMessageProperties")
+                    local TextSource = data.TextSource
+                    local PrefixText = data.PrefixText or ""
+                    if TextSource then
+                        local plr = Players:GetPlayerByUserId(TextSource.UserId)
+                        if plr then
+                            local nameColor = plr:GetAttribute("ChatNameColor")
+                            if nameColor then
+                                local colorStr = richTextColor(nameColor)
+                                PrefixText = "<font color='" .. colorStr .. "'>" .. PrefixText .. "</font>"
+                            end
+                            local gameTags = getGamePrefixTags(plr)
+                            local customPrefix = ""
+                            if TagRegister[plr] then
+                                customPrefix = customPrefix .. TagRegister[plr]
+                            end
+                            local fullPrefix = customPrefix .. gameTags .. PrefixText
+                            properties.PrefixText = fullPrefix
+                        else
+                            properties.PrefixText = PrefixText
+                        end
+                    end
+                    properties.Text = data.Text
+                    return properties
+                end
+            --[[elseif chatVersion == Enum.ChatVersion.LegacyChatService then
+                ChatService:RegisterProcessCommandsFunction("CustomPrefix", function(speakerName, message)
+                    TagRegister = shared.TagRegister or {}
+                    local plr = Players:FindFirstChild(speakerName)
+                    if plr then
+                        local prefix = ""
+                        if TagRegister[plr] then
+                            prefix = prefix .. TagRegister[plr]
+                        end
+                        if plr:GetAttribute("__OwnsVIPGamepass") and plr:GetAttribute("VIPChatTag") ~= false then
+                            prefix = prefix .. "[VIP] "
+                        end
+                        local currentLevel = plr:GetAttribute("_CurrentLevel")
+                        if currentLevel then
+                            prefix = prefix .. string.format("[%s] ", tostring(currentLevel))
+                        end
+                        local playerTagValue = plr:FindFirstChild("PlayerTagValue")
+                        if playerTagValue and playerTagValue.Value then
+                            prefix = prefix .. string.format("[#%s] ", tostring(playerTagValue.Value))
+                        end
+                        prefix = prefix .. speakerName
+                        return prefix .. " " .. message
+                    end
+                    return message
+                end)
+            end--]]
+        end
+    end)
+end)
 --pcall(function() if game:GetService("Players").LocalPlayer.Name == "RealYoBadassAtWars" then game:GetService("Players").LocalPlayer:Kick("Blacklisted from erchodev#0 [Voidware Onwer]") end end)
 if (not CheatEngineMode) then checkDebug() end
 local baseDirectory = shared.RiseMode and "rise/" or "vape/"
