@@ -457,7 +457,7 @@ function bedwars.ViewmodelController:playAnimation(id)
 end
 bedwars.BlockController = {}
 function bedwars.BlockController:isBlockBreakable() return true end
-function bedwars.BlockController:getBlockPosition(block)
+function bedwars.BlockController:getBlockPosition(block, nearestBed)
     local RayParams = RaycastParams.new()
     RayParams.FilterType = Enum.RaycastFilterType.Exclude
 	local ignoreTable = bedwars.QueryUtil.queryIgnored
@@ -469,7 +469,10 @@ function bedwars.BlockController:getBlockPosition(block)
     local RayRes = game.Workspace:Raycast(type(block) == "userdata" and block.Position or block + Vector3.new(0, 30, 0), Vector3.new(0, -35, 0), RayParams)
     local targetBlock
     if RayRes then
-        targetBlock = RayRes.Instance or type(block) == "userdata" and black or nil		
+        targetBlock = RayRes.Instance or type(block) == "userdata" and black or nil	
+		if RayRes.Instance ~= nil and RayRes.Instance:GetAttribute("NoBreak") and nearestBed ~= nil then
+			targetBlock = nearestBed
+		end	
         local function resolvePos(pos) return Vector3.new(math.round(pos.X / 3), math.round(pos.Y / 3), math.round(pos.Z / 3)) end
         return resolvePos(targetBlock.Position), targetBlock
     else
@@ -11245,6 +11248,8 @@ run(function()
         end
     end
 
+	local nearestBed
+
 	local breakBlock = function(pos, effects, normal, bypass, anim)
 		if GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton and GuiLibrary.ObjectsThatCanBeSaved.InfiniteFlyOptionsButton.Api.Enabled then
 			return
@@ -11255,7 +11260,7 @@ run(function()
 		local block, blockpos = nil, nil
 		if not bypass then block, blockpos = getLastCovered(pos, normal) end
 		--if not block then block, blockpos = getPlacedBlock(bedwars.BlockController:getBlockPosition(pos)) end
-		if not block then blockpos, block = bedwars.BlockController:getBlockPosition(pos) end
+		if not block then blockpos, block = bedwars.BlockController:getBlockPosition(pos, nearestBed) end
 		updateVisualizer(block, true)
 		if not isblockbreakable(block, lplr) then blockpos, block = nil, nil end
 		if blockpos and block then
@@ -11426,6 +11431,7 @@ run(function()
 										if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange.Value then
 											if tool and bedwars.ItemTable[tool.Name].breakBlock and bedwars.BlockController:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) then
 												nearbed = true
+												nearestBed = obj
 												if nukerclosestblock.Enabled then
                                                     local playerPos = entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position
                                                     local closestBlock, closestPos, closestNormal = findClosestBreakableBlock(obj.Position, playerPos)
