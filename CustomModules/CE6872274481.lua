@@ -324,13 +324,18 @@ local function decorateRemote(remote, src)
     return src
 end
 
-function bedwars.Client:Get(remName, customTable, resRequired)
+function bedwars.Client:Get(remName, customTable, resRequired, blacklist)
     if cache[remName] then
         return cache[remName] 
     end
+	blacklist = blacklist or {}
+	if remName == bedwars.ProjectileRemote then
+		--customTable = bedwars.Client:GetNamespace(bedwars.ProjectileRemote, {"OasisProjectileFire"})
+		blacklist = {"OasisProjectileFired"}
+	end
     local remotes = customTable or getRemotes({"ReplicatedStorage"})
     for _, v in pairs(remotes) do
-        if v.Name == remName or string.find(v.Name, remName) then  
+        if v.Name == remName or string.find(v.Name, remName) and not table.find(blacklist, v.Name) then  
             local remote
             if not resRequired then
                 remote = decorateRemote(v, {})

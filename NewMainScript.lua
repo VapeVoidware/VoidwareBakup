@@ -1,5 +1,10 @@
 repeat task.wait() until game:IsLoaded()
 shared.oldgetcustomasset = shared.oldgetcustomasset or getcustomasset
+local smooth = not game:IsLoaded()
+repeat task.wait() until game:IsLoaded()
+if smooth then
+    task.wait(10)
+end
 task.spawn(function()
     repeat task.wait() until shared.VapeFullyLoaded
     getgenv().getcustomasset = shared.oldgetcustomasset -- vape bad code moment
