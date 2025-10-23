@@ -1248,7 +1248,7 @@ bedwars.getInventory = function(plr)
 	return inv
 end
 bedwars.getKit = function(plr)
-	return plr:GetAttribute("PlayingAsKit") or "none"
+	return plr:GetAttribute("PlayingAsKits") or "none"
 end
 bedwars.QueueController = {}
 function bedwars.QueueController:leaveParty()
