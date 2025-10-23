@@ -11561,6 +11561,7 @@ run(function()
 	local Priority = {ObjectList = {}}
 	local Layers = {Value = 2}
 	local CPS = {Value = 50}
+	local Mode = {Value = "On Key"}
 
 	local AutoSwitch = {Enabled = false}
 	local HandCheck = {Enabled = false}
@@ -11568,8 +11569,8 @@ run(function()
     
     local function getBedNear()
         local localPosition = entitylib.isAlive and entitylib.character.HumanoidRootPart.Position or Vector3.zero
-        for _, v in collectionService:GetTagged('bed') do
-            if (localPosition - v.Position).Magnitude < 20 and v:GetAttribute('Team'..(lplr:GetAttribute('Team') or -1)..'NoBreak') then
+        for _, v in collectionService:GetTagged("bed") do
+            if (localPosition - v.Position).Magnitude < 20 and v:GetAttribute("Team"..(lplr:GetAttribute("Team") or -1).."NoBreak") then
                 return v
             end
         end
@@ -11578,7 +11579,7 @@ run(function()
 	local function isAllowed(block)
 		if not BlockTypeCheck.Enabled then return true end
 		local allowed = {"wool", "stone_brick", "wood_plank_oak", "ceramic", "obsidian"}
-		for i,v in pairs(allowed) do
+		for _, v in pairs(allowed) do
 			if string.find(string.lower(tostring(block)), v) then 
 				return true
 			end
@@ -11596,7 +11597,7 @@ run(function()
         end
 
         local priorityMap = {}
-        for i, v in pairs(Priority.ObjectList) do
+        for _, v in pairs(Priority.ObjectList) do
 			local core = v:split("/")
             local blockType, layer = core[1], core[2]
             if blockType and layer then
@@ -11609,9 +11610,9 @@ run(function()
 
         for _, block in pairs(blocks) do
 			local prioLayer
-			for i,v in pairs(priorityMap) do
-				if string.find(string.lower(tostring(block.itemType)), string.lower(tostring(i))) then
-					prioLayer = v
+			for name, layer in pairs(priorityMap) do
+				if string.find(string.lower(tostring(block.itemType)), string.lower(tostring(name))) then
+					prioLayer = layer
 					break
 				end
 			end
@@ -11622,13 +11623,8 @@ run(function()
             end
         end
 
-        table.sort(prioritizedBlocks, function(a, b)
-            return a.layer < b.layer
-        end)
-
-        table.sort(fallbackBlocks, function(a, b)
-            return a.health > b.health
-        end)
+        table.sort(prioritizedBlocks, function(a, b) return a.layer < b.layer end)
+        table.sort(fallbackBlocks, function(a, b) return a.health > b.health end)
 
         local finalBlocks = {}
         for _, block in pairs(prioritizedBlocks) do
@@ -11646,9 +11642,9 @@ run(function()
         for h = size, 0, -1 do
             for w = h, 0, -1 do
                 table.insert(positions, Vector3.new(w, (size - h), ((h + 1) - w)) * grid)
-                table.insert(positions, Vector3.new(w * -1, (size - h), ((h + 1) - w)) * grid)
-                table.insert(positions, Vector3.new(w, (size - h), (h - w) * -1) * grid)
-                table.insert(positions, Vector3.new(w * -1, (size - h), (h - w) * -1) * grid)
+                table.insert(positions, Vector3.new(-w, (size - h), ((h + 1) - w)) * grid)
+                table.insert(positions, Vector3.new(w, (size - h), -(h - w)) * grid)
+                table.insert(positions, Vector3.new(-w, (size - h), -(h - w)) * grid)
             end
         end
         return positions
@@ -11656,7 +11652,7 @@ run(function()
 
     local function tblClone(cltbl)
         local restbl = table.clone(cltbl)
-        for i, v in pairs(cltbl) do
+        for _, v in pairs(cltbl) do
             table.insert(restbl, v)
         end
         return restbl
@@ -11668,6 +11664,51 @@ run(function()
         end
         return restbl
     end
+
+	local autoCheckLoop
+
+	local function autoCheck()
+		if not BedProtector.Enabled or Mode.Value ~= "Toggle" then return end
+
+		local bed = getBedNear()
+		if not bed then return end
+
+		local bedPos = bed.Position
+		local playerPos = entitylib.isAlive and entitylib.character.HumanoidRootPart.Position or Vector3.zero
+		local distance = (playerPos - bedPos).Magnitude
+
+		if distance < 12 then
+			local blocks = getBlocks()
+			if #blocks == 0 then return end
+
+			local positions = getPyramid(Layers.Value - 1, 3)
+			for _, pos in ipairs(positions) do
+				local blockPos = bedPos + pos
+				if not getPlacedBlock(blockPos) then
+					bedwars.placeBlock(blockPos, blocks[1][1], false)
+					task.wait(1 / CPS.Value)
+				end
+			end
+		end
+	end
+
+	local function startAutoLoop()
+		if autoCheckLoop then return end
+		autoCheckLoop = task.spawn(function()
+			while BedProtector.Enabled and Mode.Value == "Toggle" do
+				autoCheck()
+				task.wait(1.5)
+			end
+			autoCheckLoop = nil
+		end)
+	end
+
+	local function stopAutoLoop()
+		if autoCheckLoop then
+			task.cancel(autoCheckLoop)
+			autoCheckLoop = nil
+		end
+	end
 
     local res_attempts = 0
     
@@ -11692,9 +11733,9 @@ run(function()
 				switchItem(block.tool)
 			end
 
-            local positions = getPyramid(blockIndex - 1, 3) 
+            local positions = getPyramid(blockIndex - 1, 3)
             if posIndex > #positions then
-                blockIndex = blockIndex + 1
+                blockIndex += 1
                 posIndex = 1
                 task.delay(delay, placeNextBlock)
                 return
@@ -11705,21 +11746,25 @@ run(function()
                 bedwars.placeBlock(bedPos + pos, block[1], false)
             end
             
-            posIndex = posIndex + 1
+            posIndex += 1
             task.delay(delay, placeNextBlock)
         end
         
         placeNextBlock()
     end
-    
+
     BedProtector = GuiLibrary.ObjectsThatCanBeSaved.WorldWindow.Api.CreateOptionsButton({
-        Name = 'BedProtector',
+        Name = "BedProtector",
         Function = function(callback)
             if callback then
+				if Mode.Value == "Toggle" then
+					startAutoLoop()
+					return
+				end
+
                 local bed = getBedNear()
                 local bedPos = bed and bed.Position
                 if bedPos then
-
 					if HandCheck.Enabled and not AutoSwitch.Enabled then
 						if not (store.hand and store.hand.toolType == "block") then
 							errorNotification("BedProtector | Hand Check", "You aren't holding a block!", 1.5)
@@ -11731,32 +11776,33 @@ run(function()
                     local blocks = getBlocks()
                     if #blocks == 0 then 
                         warningNotification("BedProtector", "No blocks for bed defense found!", 3) 
-                        BedProtector.ToggleButton(false) 
+                        BedProtector.ToggleButton(false)
                         return 
                     end
-                    
+
                     if #blocks < Layers.Value then
                         repeat 
                             blocks = tblClone(blocks)
                             blocks = cleantbl(blocks, Layers.Value)
                             task.wait()
-                            res_attempts = res_attempts + 1
+                            res_attempts += 1
                         until #blocks == Layers.Value or res_attempts > (Layers.Value < 10 and Layers.Value or 10)
                     elseif #blocks > Layers.Value then
                         blocks = cleantbl(blocks, Layers.Value)
                     end
                     res_attempts = 0
-                    
+
                     buildProtection(bedPos, blocks, Layers.Value, CPS.Value)
                 else
-                    InfoNotification('BedProtector', 'Please get closer to your bed!', 5)
+                    InfoNotification("BedProtector", "Please get closer to your bed!", 5)
                     BedProtector.ToggleButton(false)
                 end
             else
+				stopAutoLoop()
                 res_attempts = 0
             end
         end,
-        HoverText = 'Automatically places strong blocks around the bed with customizable speed.'
+        HoverText = "Automatically places strong blocks around the bed with customizable speed."
     })
 
     Layers = BedProtector.CreateSlider({
@@ -11783,6 +11829,20 @@ run(function()
 		Default = true
 	})
 
+	Mode = BedProtector.CreateDropdown({
+		Name = "Mode",
+		List = {"Toggle", "On Key"},
+		Function = function(val)
+			Mode.Value = val
+			if val == "Toggle" and BedProtector.Enabled then
+				startAutoLoop()
+			else
+				stopAutoLoop()
+			end
+		end,
+		Default = "On Key"
+	})
+
 	HandCheck = BedProtector.CreateToggle({
 		Name = "Hand Check",
 		Function = function() end
@@ -11801,8 +11861,8 @@ run(function()
 		SortFunction = function(a, b)
 			local layer1 = a:split("/")
 			local layer2 = b:split("/")
-			layer1 = #layer1 and tonumber(layer1[2]) or 1
-			layer2 = #layer2 and tonumber(layer2[2]) or 1
+			layer1 = tonumber(layer1[2]) or 1
+			layer2 = tonumber(layer2[2]) or 1
 			return layer1 < layer2
 		end
 	})
