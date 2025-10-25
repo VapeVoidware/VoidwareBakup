@@ -5227,12 +5227,22 @@ run(function()
 							end)
 							local sword, swordmeta = getAttackData()
 							if sword and swordmeta and swordmeta.sword then
-								switchItem(sword.tool)
+								--switchItem(sword.tool)
 								for i, plr in pairs(plrs) do
 									local root = plr.RootPart
 									if not root then
 										continue
 									end
+									pcall(function()
+										local v = plr
+										if type(v) == "table" and v.Character ~= nil and v.Character:HasTag("Crystal") then
+											local a, b = getItemNear("pickaxe")
+											if a ~= nil and a.tool ~= nil then
+												sword = a
+											end
+										end
+									end)
+									pcall(switchItem, sword and sword.tool)
 									--if workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack < OneTapCooldown.Value/10 then continue end
 									local localfacing = entityLibrary.character.HumanoidRootPart.CFrame.lookVector
 									local vec = (plr.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position).unit
