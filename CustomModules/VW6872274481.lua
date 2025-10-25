@@ -8383,6 +8383,11 @@ run(function()
         Function = function(enabled)
             InvisibilitySystem.Enabled = enabled
             if enabled then
+				if store.queueType == "halloween_2025_event_pve" then 
+					warningNotification("Invisibility", "Disabled in halloween event!", 3)
+					Invisibility.ToggleButton(false)
+					return
+				end
                 local spiderWasDisabled = InvisUtils.toggleSpider(true)
                 
                 local taskHandle = task.spawn(applyInvisibility)
