@@ -6106,7 +6106,7 @@ run(function()
 end)
 
 run(function()
-	local TargetPart
+	local TargetPart = {Value = 'RootPart'}
 	local Targets
 	local FOV = {Value = 500}
 	local Range = {Value = 500}
@@ -6163,13 +6163,21 @@ run(function()
 		
 		local con
 		if isMobile then
-			con = UserInputService.TouchTapInWorld:Connect(function(touchPos)
-				if not hovering then updateOutline(nil); return end
-				if not ProjectileAimbot.Enabled then pcall(function() con:Disconnect() end); updateOutline(nil); return end
+			con = UserInputService.TouchTapInWorld:Connect(function(input, gameProcessed)
+				if gameProcessed or not hovering then 
+					updateOutline(nil); 
+					return 
+				end
+				if not ProjectileAimbot.Enabled then 
+					pcall(function() con:Disconnect() end); 
+					updateOutline(nil); 
+					return 
+				end
+				local touchPos = input.Position
 				local ray = workspace.CurrentCamera:ScreenPointToRay(touchPos.X, touchPos.Y)
 				local result = workspace:Raycast(ray.Origin, ray.Direction * 1000)
 				if result and result.Instance then
-					selectTarget(target)
+					selectTarget(result.Instance)
 				end
 			end)
 			table.insert(CoreConnections, con)
@@ -6188,7 +6196,7 @@ run(function()
 					local originPos = entitylib.isAlive and (shootpos or entitylib.character.HumanoidRootPart.Position) or Vector3.zero
 					
 					local plr
-					if selectedTarget and selectedTarget.Character and (selectedTarget.Character.PrimaryPart.Position - originPos).Magnitude <= Range.Value then
+					if selectedTarget and selectedTarget.Character and selectedTarget.Character.PrimaryPart and (selectedTarget.Character.PrimaryPart.Position - originPos).Magnitude <= Range.Value then
 						plr = selectedTarget
 					else
 						plr = entitylib.EntityMouse({
@@ -6202,14 +6210,17 @@ run(function()
 					end
 					updateOutline(plr)
 					
-					if plr and (plr.Character.PrimaryPart.Position - originPos).Magnitude <= Range.Value then
-						plr.HipHeight = plr.Character:FindFirstChild("Humanoid") and plr.Character:FindFirstChild("Humanoid").HipHeight or 2
+					if plr and plr.Character and plr.Character.PrimaryPart and (plr.Character.PrimaryPart.Position - originPos).Magnitude <= Range.Value then
+						local humanoid = plr.Character:FindFirstChild("Humanoid")
+						if not humanoid then return old(...) end
+						plr.HipHeight = humanoid.HipHeight or 2
+						local isJumping = humanoid.Jump
 						local pos = shootpos or self:getLaunchPosition(origin)
 						if not pos then
 							return old(...)
 						end
 	
-						if (not OtherProjectiles.Enabled) and not projmeta.projectile:find('arrow') then
+						if (not OtherProjectiles.Enabled) and not (projmeta.projectile and projmeta.projectile:find('arrow')) then
 							return old(...)
 						end
 	
@@ -6229,11 +6240,21 @@ run(function()
 							playerGravity = 6
 						end
 
+						local targetPartName = TargetPart.Value
+						local target_obj
+						if targetPartName == "RootPart" then
+							target_obj = plr.Character.PrimaryPart
+						else
+							target_obj = plr.Character:FindFirstChild(targetPartName)
+						end
+						if not target_obj then return old(...) end
+						local targetPos = target_obj.Position
+						local targetVel = (projmeta.projectile == 'telepearl' and Vector3.zero or target_obj.Velocity)
+
 						if store.hand and store.hand.tool and store.hand.tool.Name:find("spellbook") then
-							local targetPos = plr.RootPart.Position
 							local selfPos = lplr.Character.PrimaryPart.Position
 							local expectedTime = (selfPos - targetPos).Magnitude / 160
-							targetPos += (plr.RootPart.Velocity * expectedTime)
+							targetPos += (targetVel * expectedTime)
 							return {
 								initialVelocity = (selfPos - targetPos).Unit * -160,
 								positionFrom = offsetpos,
@@ -6242,10 +6263,9 @@ run(function()
 								drawDurationSeconds = 5
 							}
 						elseif store.hand and store.hand.tool and store.hand.tool.Name:find("chakram") then
-							local targetPos = plr.RootPart.Position
 							local selfPos = lplr.Character.PrimaryPart.Position
 							local expectedTime = (selfPos - targetPos).Magnitude / 80
-							targetPos += (plr.RootPart.Velocity * expectedTime)
+							targetPos += (targetVel * expectedTime)
 							return {
 								initialVelocity = (selfPos - targetPos).Unit * -80,
 								positionFrom = offsetpos,
@@ -6254,17 +6274,26 @@ run(function()
 								drawDurationSeconds = 5
 							}
 						end
-						
-						TargetPart.Value = TargetPart.Value == "RootPart" and "PrimaryPart" or TargetPart.Value
-						local newlook = CFrame.new(offsetpos, plr.Character[TargetPart.Value].Position) * CFrame.new(projmeta.projectile == 'owl_projectile' and Vector3.zero or Vector3.new(bedwars.BowConstantsTable.RelX, bedwars.BowConstantsTable.RelY, bedwars.BowConstantsTable.RelZ))
-						local calc = prediction.SolveTrajectory(newlook.p, projSpeed, gravity, plr.Character[TargetPart.Value].Position, projmeta.projectile == 'telepearl' and Vector3.zero or plr.Character[TargetPart.Value].Velocity, playerGravity, plr.HipHeight, plr.Jumping and 42.6 or nil, rayCheck)
+
+						local relOffset = Vector3.new(0, 0, 0)
+						if bedwars.BowConstantsTable then
+							relOffset = Vector3.new(bedwars.BowConstantsTable.RelX, bedwars.BowConstantsTable.RelY, bedwars.BowConstantsTable.RelZ)
+						end
+						local newlook = CFrame.new(offsetpos, targetPos) * CFrame.new(projmeta.projectile == 'owl_projectile' and Vector3.zero or relOffset)
+						local calc = prediction.SolveTrajectory(newlook.Position, projSpeed, gravity, targetPos, targetVel, playerGravity, plr.HipHeight, isJumping and 42.6 or nil, rayCheck)
 						if calc then
+							targetinfo = targetinfo or {Targets = {}}
+							targetinfo.Targets[plr] = tick() + 1
+							local drawDuration = 5
+							if projmeta.drawDurationSeconds then
+								drawDuration = projmeta.drawDurationSeconds
+							end
 							return {
-								initialVelocity = CFrame.new(newlook.Position, calc).LookVector * projSpeed,
+								initialVelocity = (calc - newlook.Position).Unit * projSpeed, -- Correct velocity vector
 								positionFrom = offsetpos,
 								deltaT = lifetime,
 								gravitationalAcceleration = gravity,
-								drawDurationSeconds = 5
+								drawDurationSeconds = drawDuration
 							}
 						end
 					end
@@ -6292,14 +6321,19 @@ run(function()
 	TargetPart = ProjectileAimbot.CreateDropdown({
 		Name = 'Part',
 		List = {'RootPart', 'Head'},
-		Function = function() end
+		Function = function(val)
+			TargetPart.Value = val
+		end,
+		Default = 'RootPart'
 	})
 	FOV = ProjectileAimbot.CreateSlider({
 		Name = 'FOV',
 		Min = 1,
 		Max = 1000,
 		Default = 1000,
-		Function = function() end
+		Function = function(val)
+			FOV.Value = val
+		end
 	})
 	Range = ProjectileAimbot.CreateSlider({
 		Name = 'Range',
@@ -6307,17 +6341,23 @@ run(function()
 		Max = 500,
 		Default = 100,
 		HoverText = 'Maximum distance for target locking',
-		Function = function() end
+		Function = function(val)
+			Range.Value = val
+		end
 	})
 	TargetVisualiser = ProjectileAimbot.CreateToggle({
 		Name = "Target Visualiser",
 		Default = true,
-		Function = function() end
+		Function = function(val)
+			TargetVisualiser.Enabled = val
+		end
 	})
 	OtherProjectiles = ProjectileAimbot.CreateToggle({
 		Name = 'Other Projectiles',
 		Default = true,
-		Function = function() end
+		Function = function(val)
+			OtherProjectiles.Enabled = val
+		end
 	})
 end)
 	
