@@ -5290,7 +5290,7 @@ run(function()
 									
 									store.attackReach = math.floor((selfrootpos - root.Position).magnitude * 100) / 100
 									store.attackReachUpdate = tick() + 1
-									--[[killaurarealremote:FireServer({
+									killaurarealremote:FireServer({
 										weapon = sword.tool,
 										chargedAttack = {chargeRatio = 0},
 										entityInstance = plr.Character,
@@ -5303,26 +5303,6 @@ run(function()
 											selfPosition = attackValue(selfpos)
 										},
 										--lastSwingServerTimeDelta = lastSwingServerTimeDelta
-									})--]]
-									local selfpos = selfrootpos
-									local actualRoot = plr.Character.PrimaryPart
-									local dir = CFrame.lookAt(selfpos, actualRoot.Position).LookVector
-									local delta = (actualRoot.Position - selfpos)
-									local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
-									actualRoot.CFrame = CFrame.new(pos)
-									killaurarealremote:FireServer({
-										weapon = sword.tool,
-										chargedAttack = {chargeRatio = 0},
-										lastSwingServerTimeDelta = 0,
-										entityInstance = v.Character,
-										validate = {
-											raycast = {
-												cameraPosition = {value = pos},
-												cursorDirection = {value = dir}
-											},
-											targetPosition = {value = pos},
-											selfPosition = {value = pos}
-										}
 									})
 									local spear = getItemNear('spear')
 									if spear then
