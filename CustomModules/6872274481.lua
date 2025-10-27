@@ -4907,40 +4907,44 @@ run(function()
 									store.attackReach = math.floor((selfrootpos - root.Position).magnitude * 100) / 100
 									store.attackReachUpdate = tick() + 1
 
-									local selfpos = selfrootpos
-									local actualRoot = plr.Character.PrimaryPart
-									local dir = CFrame.lookAt(selfpos, actualRoot.Position).LookVector
-									local delta = (actualRoot.Position - selfpos)
-									local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
-									actualRoot.CFrame = CFrame.new(pos)
-									killaurarealremote:FireServer({
-										weapon = sword.tool,
-										chargedAttack = {chargeRatio = 0},
-										lastSwingServerTimeDelta = 0,
-										entityInstance = v.Character,
-										validate = {
-											raycast = {
-												cameraPosition = {value = pos},
-												cursorDirection = {value = dir}
+									if shared.INF_RANGE_EXPLOIT then
+										local selfpos = selfrootpos
+										local actualRoot = plr.Character.PrimaryPart
+										local dir = CFrame.lookAt(selfpos, actualRoot.Position).LookVector
+										local delta = (actualRoot.Position - selfpos)
+										local pos = selfpos + dir * math.max(delta.Magnitude - 14.399, 0)
+										actualRoot.CFrame = CFrame.new(pos)
+										killaurarealremote:FireServer({
+											weapon = sword.tool,
+											chargedAttack = {chargeRatio = 0},
+											lastSwingServerTimeDelta = 0,
+											entityInstance = v.Character,
+											validate = {
+												raycast = {
+													cameraPosition = {value = pos},
+													cursorDirection = {value = dir}
+												},
+												targetPosition = {value = pos},
+												selfPosition = {value = pos}
+											}
+										})
+									else
+										killaurarealremote:FireServer({
+											weapon = sword.tool,
+											chargedAttack = {chargeRatio = 0},
+											entityInstance = plr.Character,
+											validate = {
+												raycast = {
+													cameraPosition = attackValue(root.Position),
+													cursorDirection = attackValue(CFrame.new(selfpos, root.Position).lookVector)
+												},
+												targetPosition = attackValue(root.Position),
+												selfPosition = attackValue(selfpos)
 											},
-											targetPosition = {value = pos},
-											selfPosition = {value = pos}
-										}
-									})
-									--[[killaurarealremote:FireServer({
-										weapon = sword.tool,
-										chargedAttack = {chargeRatio = 0},
-										entityInstance = plr.Character,
-										validate = {
-											raycast = {
-												cameraPosition = attackValue(root.Position),
-												cursorDirection = attackValue(CFrame.new(selfpos, root.Position).lookVector)
-											},
-											targetPosition = attackValue(root.Position),
-											selfPosition = attackValue(selfpos)
-										},
-										--lastSwingServerTimeDelta = lastSwingServerTimeDelta
-									})--]]
+											--lastSwingServerTimeDelta = lastSwingServerTimeDelta
+										})
+									end
+									
 									local spear = getItemNear('spear')
 									if spear then
 										switchItem(spear.tool)
@@ -5033,6 +5037,12 @@ run(function()
 			end
 		end,
 		HoverText = "Attack players around you\nwithout aiming at them."
+	})
+	Killaura.CreateToggle({
+		Name = "INF Range Exploit",
+		Function = function(call)
+			shared.INF_RANGE_EXPLOIT = call
+		end
 	})
 	killauratargetframe = Killaura.CreateTargetWindow({})
 	local sortmethods = {"Distance"}
