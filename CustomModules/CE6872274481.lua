@@ -5293,16 +5293,16 @@ run(function()
 									killaurarealremote:FireServer({
 										weapon = sword.tool,
 										chargedAttack = {chargeRatio = 0},
+										lastSwingServerTimeDelta = 10,
 										entityInstance = plr.Character,
 										validate = {
 											raycast = {
-												cameraPosition = attackValue(root.Position),
-												cursorDirection = attackValue(CFrame.new(selfpos, root.Position).lookVector)
+												cameraPosition = {value = vector.create(0/0,0/0,0/0)},
+												cursorDirection = {value = vector.create(0/0,0/0,0/0)}
 											},
-											targetPosition = attackValue(root.Position),
-											selfPosition = attackValue(selfpos)
-										},
-										--lastSwingServerTimeDelta = lastSwingServerTimeDelta
+											targetPosition = {value = vector.create(0/0,0/0,0/0)},
+											selfPosition = {value = vector.create(0/0,0/0,0/0)}
+										}
 									})
 									local spear = getItemNear('spear')
 									if spear then
