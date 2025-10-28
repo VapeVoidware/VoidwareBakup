@@ -5408,7 +5408,7 @@ run(function()
 	killaurarange = Killaura.CreateSlider({
 		Name = "Attack range",
 		Min = 1,
-		Max = 18,
+		Max = 100000,
 		Function = function(val)
 			if killaurarangecirclepart then
 				killaurarangecirclepart.Size = Vector3.new(val * 0.7, 0.01, val * 0.7)
