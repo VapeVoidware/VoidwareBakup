@@ -9347,6 +9347,13 @@ run(function()
 	end
 
 	local AutoKit_Functions = {
+		pinata = function()
+			kitCollection(lplr.Name..':pinata', function(v)
+				if getItem('candy') then
+					bedwars.Client:Get("DepositCoins"):CallServer(v)
+				end
+			end, 6, true)
+		end,
 		ember = function()
 			shared.EmberAutoKit = true
 		end,

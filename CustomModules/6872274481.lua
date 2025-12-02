@@ -2103,7 +2103,8 @@ run(function()
         HannahKill = "HannahPromptTrigger",
         SummonerClawAttack = "SummonerClawAttackRequest",
         CryptGravestone = "ActivateGravestone",
-        WhisperProjectile = "OwlFireProjectile"
+        WhisperProjectile = "OwlFireProjectile",
+		DepositPinata = "DepositCoins"
     }
 
     local remoteDefinitions = {
@@ -2138,7 +2139,8 @@ run(function()
         TreeRemote = function() return bedwars2.Client:Get(remz.TreeRemote, 0) end,
         PickupRemote = function() return bedwars2.Client:Get(remz.PickupRemote, 0) end,
         ReportRemote = function() return bedwars2.Client:Get(remz.ReportPlayer, 0) end,
-        ResetRemote = function() return bedwars2.Client:Get(remz.ResetCharacter, 0) end
+        ResetRemote = function() return bedwars2.Client:Get(remz.ResetCharacter, 0) end,
+		DepositPinata = function() return bedwars2.Client:Get(remz.DepositPinata, 0) end
     }
 
     remotes = setmetatable({}, {
@@ -10007,6 +10009,13 @@ run(function()
 	local CoreConnections = {}
 
 	local AutoKit_Functions = {
+		pinata = function()
+			kitCollection(lplr.Name..':pinata', function(v)
+				if getItem('candy') then
+					bedwars.Client:Get(remotes.DepositPinata):CallServer(v)
+				end
+			end, 6, true)
+		end,
 		gingerbread_man = function()
 			local old = bedwars.LaunchPadController.attemptLaunch
 			bedwars.LaunchPadController.attemptLaunch = function(...)
