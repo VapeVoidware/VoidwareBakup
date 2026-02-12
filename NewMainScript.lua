@@ -69,7 +69,7 @@ local function checkRequire()
     end
 end
 --task.spawn(function() pcall(checkRequire) end)
-pcall(checkRequire)
+--pcall(checkRequire)
 local function checkDebug()
     if CheatEngineMode then return end
     if not getgenv().debug then 
