@@ -601,6 +601,7 @@ else
     commit = '9637b74a290e556b1305b4cb0e85012af04b3183'
 end--]]
 commit = shared.CustomCommit and tostring(shared.CustomCommit) or commit
+shared.VOIDWARE_SCRIPT_TYPE = "BEDWARS_OLD"
 writefile(baseDirectory.."commithash2.txt", commit)
 local function vapeGithubRequest(scripturl, isImportant)
     if isfile(baseDirectory..scripturl) then
